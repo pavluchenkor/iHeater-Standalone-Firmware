@@ -1,0 +1,41 @@
+{
+  "build": {
+    "cpu": "cortex-m0",
+    "extra_flags": "-DSTM32F042x6",
+    "f_cpu": "48000000L",
+    "mcu": "stm32f042f6p6",
+    "product_line": "STM32F042x6",
+    "variant": "STM32F0xx/F042F6P"
+  },
+  "debug": {
+    "default_tools": [
+      "stlink"
+    ],
+    "jlink_device": "STM32F042F6",
+    "onboard_tools": [
+      "stlink"
+    ],
+    "openocd_target": "stm32f0x",
+    "svd_path": "STM32F0x1.svd"
+  },
+  "frameworks": [
+    "arduino",
+    "cmsis",
+    "stm32cube",
+    "libopencm3"
+  ],
+  "name": "Generic STM32F042F6",
+  "upload": {
+    "maximum_ram_size": 6144,
+    "maximum_size": 32768,
+    "protocol": "stlink",
+    "protocols": [
+      "jlink",
+      "cmsis-dap",
+      "stlink",
+      "blackmagic"
+    ]
+  },
+  "url": "https://www.st.com/en/microcontrollers-microprocessors/stm32f042f6.html",
+  "vendor": "ST"
+}
