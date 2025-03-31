@@ -71,10 +71,18 @@ float heater_start_temp = 0.0f;
 bool heater_warming_up = false;
 bool heater_fault = false;
 
+
 uint8_t last_mode = 0;
 uint32_t air_target_timer = 0;
 bool air_target_tracking = false;
-bool was_mode_zero = true; // новый флаг
+bool was_mode_zero = true;
+
+
+bool air_fault = false;
+bool air_warming_up = false;
+uint32_t air_start_time = 0;
+float air_start_temp = 0.0f;
+
 
 //! TEST
 float heater_setpoint = 0.0f;
@@ -99,6 +107,7 @@ static void MX_TIM2_Init(void);
 uint32_t LoadErrorCode(void);
 void ClearErrorCode(void);
 float GetTemperatureByMode(uint8_t mode);
+void Update_LEDs(uint8_t mode, float current_temp, uint32_t speed);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -202,24 +211,27 @@ int main(void)
     combined_filter_update(&combined_air, 25.0f);
   }
   mode = 0;
-  Update_LEDs(mode, air_temp);
+  Update_LEDs(mode, air_temp, 0);
+
   MX_IWDG_Init();
   // HAL_IWDG_Refresh(&hiwdg);
   IWDG->KR = 0xAAAA; // Рефреш
 
   uint32_t code = LoadErrorCode();
 
-  // code = 0x01;
-
   if (code != ERROR_NONE && code != 0xFFFFFFFF)
   {
     float fake_temp = (code == ERROR_UNKNOWN) ? 100.0f : 0.0f;
 
+    HAL_GPIO_WritePin(FAN_GPIO_Port, FAN_Pin, GPIO_PIN_SET);
+
+    IWDG->KR = 0xAAAA;
     while (HAL_GPIO_ReadPin(MODE_GPIO_Port, MODE_Pin) == GPIO_PIN_SET)
     {
-      Update_LEDs(code, fake_temp);
+      Update_LEDs(code, fake_temp, 50);
+      IWDG->KR = 0xAAAA;
     }
-
+    
     for (int i = 0; i < 3; i++)
     {
       HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
@@ -239,6 +251,7 @@ int main(void)
     }
 
     ClearErrorCode();
+    HAL_GPIO_WritePin(FAN_GPIO_Port, FAN_Pin, GPIO_PIN_RESET);
   }
 
   /* USER CODE END 2 */
@@ -248,13 +261,19 @@ int main(void)
   while (1)
   {
 
-    if (heater_temp > 35 || air_temp > 35)
+    if (HAL_GPIO_ReadPin(FAN_GPIO_Port, FAN_Pin) == GPIO_PIN_RESET)
     {
-      HAL_GPIO_WritePin(FAN_GPIO_Port, FAN_Pin, GPIO_PIN_SET);
+      if (heater_temp > FAN_ON_TEMP || air_temp > FAN_ON_TEMP)
+      {
+        HAL_GPIO_WritePin(FAN_GPIO_Port, FAN_Pin, GPIO_PIN_SET);
+      }
     }
     else
     {
-      HAL_GPIO_WritePin(FAN_GPIO_Port, FAN_Pin, GPIO_PIN_RESET);
+      if (heater_temp < FAN_OFF_TEMP && air_temp < FAN_OFF_TEMP)
+      {
+        HAL_GPIO_WritePin(FAN_GPIO_Port, FAN_Pin, GPIO_PIN_RESET);
+      }
     }
 
     adc_value1 = (float)adc_dma_buffer[0] / 4095.0f;
@@ -384,37 +403,42 @@ int main(void)
     }
 
 
-    if (!heater_fault && mode != 0) {
-        if ((mode != 0 && was_mode_zero) || (mode != last_mode)) {
-            // Режим только что изменился — запускаем отслеживание
-            air_target_timer = HAL_GetTick();
-            air_target_tracking = true;
-            last_mode = mode;
-            was_mode_zero = false;
-        }
-
-        if (air_target_tracking) {
-            if (air_temp >= air_target - 1.0f) {
-                // Цель достигнута — всё норм
-                air_target_tracking = false;
-            } else if (HAL_GetTick() - air_target_timer > AIR_TARGET_TIMEOUT_MS) {
-                // Время вышло, а воздух не нагрелся — ошибка
-                heater_fault = true;
-                air_target_tracking = false;
-            }
-        }
-    } else {
-        // Если режим отключён или есть ошибка — сбрасываем слежение
-        air_target_tracking = false;
-        last_mode = mode; // сохраняем, чтобы при включении снова сработало
-    }
-
-    if (mode == 0)
+    if (!air_fault && mode != 0)
     {
-      was_mode_zero = true;
+      // Если температура уже достигнута — не отслеживаем
+      if (air_temp >= air_target - 5.0f)
+      {
+        air_warming_up = false;
+      }
+      else if (!air_warming_up)
+      {
+        // Начинаем отслеживание
+        air_start_time = HAL_GetTick();
+        air_start_temp = air_temp;
+        air_warming_up = true;
+      }
+      else
+      {
+        // Уже отслеживаем — проверим прогресс
+        if (air_temp > air_start_temp + AIR_MIN_TEMP_DELTA)
+        {
+          // Нагрев пошёл — всё хорошо
+          air_warming_up = false;
+        }
+        else if (HAL_GetTick() - air_start_time > AIR_RESPONSE_TIMEOUT_MS)
+        {
+          // Время вышло — ошибка
+          air_fault = true;
+          air_warming_up = false;
+        }
+      }
+    }
+    else
+    {
+      air_warming_up = false;
     }
 
-    if (heater_fault)
+    if (air_fault)
     {
         SaveErrorCode(ERROR_FAULT_TEMP_TIMEOUT);
         NVIC_SystemReset();  
@@ -455,8 +479,7 @@ int main(void)
         }
     }
 
-    // Update_LEDs(1, air_temp);
-    Update_LEDs(mode, air_temp);
+    Update_LEDs(mode, air_temp, 500);
 
     // HAL_IWDG_Refresh(&hiwdg);
     IWDG->KR = 0xAAAA;
@@ -688,17 +711,8 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-// void Update_LEDs(uint8_t mode)
-// {
 
-//     // Установка состояния светодиодов на основе битов mode
-//     HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, (mode & 0x01) ? GPIO_PIN_SET : GPIO_PIN_RESET); // Bit 0
-//     HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, (mode & 0x02) ? GPIO_PIN_SET : GPIO_PIN_RESET); // Bit 1
-//     HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, (mode & 0x04) ? GPIO_PIN_SET : GPIO_PIN_RESET); // Bit 2
-// }
-
-
-void Update_LEDs(uint8_t mode, float current_temp)
+void Update_LEDs(uint8_t mode, float current_temp, uint32_t speed)
 {
     static uint32_t last_toggle_time = 0;
     static bool blink_state = false;
@@ -706,59 +720,23 @@ void Update_LEDs(uint8_t mode, float current_temp)
     float target_temp = GetTemperatureByMode(mode);
     bool at_target = current_temp >= (target_temp - 5.0f); // допуск, например 5C
 
-    uint32_t now = HAL_GetTick();
+    uint32_t tick = HAL_GetTick();
 
     // Моргаем, если температура еще не достигнута
     if (!at_target) {
-        if (now - last_toggle_time >= 250) { // 2 Гц = каждые 500 мс, т.е. toggle каждые 250 мс
+        if (tick  - last_toggle_time >= speed) { // 2 Гц = каждые 500 мс, т.е. toggle каждые 250 мс
             blink_state = !blink_state;
-            last_toggle_time = now;
+            last_toggle_time = tick;
         }
     } else {
         blink_state = true; // зажечь стабильно
+        last_toggle_time = tick;
     }
 
     // Отобразить состояние на светодиодах
     HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, ((mode & 0x01) && blink_state) ? GPIO_PIN_SET : GPIO_PIN_RESET);
     HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, ((mode & 0x02) && blink_state) ? GPIO_PIN_SET : GPIO_PIN_RESET);
     HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, ((mode & 0x04) && blink_state) ? GPIO_PIN_SET : GPIO_PIN_RESET);
-}
-
-
-// Мигалка ошибок
-void ShowErrorLED(uint8_t code)
-{
-    static uint32_t last_blink_time = 0;
-    static uint8_t blink_count = 0;
-    static bool led_state = false;
-    static bool pause_between_cycles = false;
-    static uint32_t pause_start_time = 0;
-
-    uint32_t now = HAL_GetTick();
-
-    if (pause_between_cycles) {
-        // Пауза между сериями миганий (1 сек)
-        if (now - pause_start_time >= 1000) {
-            pause_between_cycles = false;
-            blink_count = 0;
-        }
-        return;
-    }
-
-    if (now - last_blink_time >= 300) {
-        last_blink_time = now;
-
-        if (blink_count < code) {
-            led_state = !led_state;
-            HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, led_state ? GPIO_PIN_SET : GPIO_PIN_RESET);
-            if (!led_state) blink_count++; // считаем только завершённые вспышки
-        } else {
-            // Серия завершена — пауза
-            HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
-            pause_between_cycles = true;
-            pause_start_time = now;
-        }
-    }
 }
 
 
@@ -803,7 +781,7 @@ void MX_IWDG_Init(void)
     IWDG->KR = 0xCCCC;  // Enable
     IWDG->KR = 0x5555;  // Allow write
     IWDG->PR = 0x03;    // Prescaler: 64
-    IWDG->RLR = 1250;   // Reload value
+    IWDG->RLR = 2000;   // Reload value
     while (IWDG->SR != 0) {} // Ждём готовности
     IWDG->KR = 0xAAAA;  // Первый сброс
 }

@@ -34,14 +34,19 @@
 #define MIN_TEMP 0                  // Set according to enclosure material
 #define MAX_TEMP 110                // Set according to enclosure material
 #define MIN_AIR_TEMP 0              // Set according to enclosure material
-#define MAX_AIR_TEMP 110            // Set according to enclosure material
+#define MAX_AIR_TEMP 90             // Set according to enclosure material
 #define PID_UPDATE_INTERVAL_MS 100  // PID update interval in milliseconds
 
-#define HEATER_RESPONSE_TIMEOUT_MS 5000  // Time to wait for heater response
+#define HEATER_RESPONSE_TIMEOUT_MS 15000  // Time to wait for heater response
 #define HEATER_MIN_TEMP_DELTA     0.3f   // Minimum required temperature increase
 #define HEATER_MIN_PWM            80.0f  // Minimum PWM value for response check
 
-#define AIR_TARGET_TIMEOUT_MS 1000 * 60 * 10 // 10 minutes
+#define AIR_MIN_TEMP_DELTA     5.0f   // Minimum required air temperature increase
+#define AIR_RESPONSE_TIMEOUT_MS (1000 * 60 * 10) // 10min
+
+#define FAN_ON_TEMP     40.0f
+#define FAN_OFF_TEMP    35.0f
+
 
 // Temperature setpoints per mode
 #define MODE0 0.0f
