@@ -348,6 +348,7 @@ int main(void)
 
 
 /*======================ПРОВЕРКИ============================*/
+    
     if (air_temp <= MIN_AIR_TEMP)
     {
       SaveErrorCode(ERROR_THERMISTOR_OPEN_AIR);
@@ -401,7 +402,6 @@ int main(void)
       SaveErrorCode(ERROR_FAULT_HEATER_NORESP);
       NVIC_SystemReset();  
     }
-
 
     if (!air_fault && mode != 0)
     {
