@@ -108,6 +108,7 @@ uint32_t LoadErrorCode(void);
 void ClearErrorCode(void);
 float GetTemperatureByMode(uint8_t mode);
 void Update_LEDs(uint8_t mode, float current_temp, uint32_t speed);
+void reset_LEDs(uint8_t repeats);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -232,22 +233,9 @@ int main(void)
       IWDG->KR = 0xAAAA;
     }
     
-    for (int i = 0; i < 3; i++)
+    while (HAL_GPIO_ReadPin(MODE_GPIO_Port, MODE_Pin) == GPIO_PIN_RESET)
     {
-      HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
-      HAL_Delay(100);
-      HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
-
-      HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
-      HAL_Delay(100);
-      HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
-
-      HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
-      HAL_Delay(100);
-      HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
-
-      HAL_Delay(200);
-      IWDG->KR = 0xAAAA;
+      reset_LEDs(3);
     }
 
     ClearErrorCode();
@@ -261,20 +249,31 @@ int main(void)
   while (1)
   {
 
-    if (HAL_GPIO_ReadPin(FAN_GPIO_Port, FAN_Pin) == GPIO_PIN_RESET)
+    if (mode == 0)
     {
-      if (heater_temp > FAN_ON_TEMP || air_temp > FAN_ON_TEMP)
-      {
-        HAL_GPIO_WritePin(FAN_GPIO_Port, FAN_Pin, GPIO_PIN_SET);
-      }
+        // В режиме 0 смотрим только на нагреватель
+        if (heater_temp > FAN_ON_TEMP)
+        {
+            HAL_GPIO_WritePin(FAN_GPIO_Port, FAN_Pin, GPIO_PIN_SET);
+        }
+        else if (heater_temp < FAN_OFF_TEMP)
+        {
+            HAL_GPIO_WritePin(FAN_GPIO_Port, FAN_Pin, GPIO_PIN_RESET);
+        }
     }
     else
     {
-      if (heater_temp < FAN_OFF_TEMP && air_temp < FAN_OFF_TEMP)
-      {
-        HAL_GPIO_WritePin(FAN_GPIO_Port, FAN_Pin, GPIO_PIN_RESET);
-      }
+        // В активных режимах учитываем обе температуры
+        if (heater_temp > FAN_ON_ACTIVE_MODE_TEMP || air_temp > FAN_ON_ACTIVE_MODE_TEMP)
+        {
+            HAL_GPIO_WritePin(FAN_GPIO_Port, FAN_Pin, GPIO_PIN_SET);
+        }
+        else if (heater_temp < FAN_OFF_TEMP && air_temp < FAN_OFF_TEMP)
+        {
+            HAL_GPIO_WritePin(FAN_GPIO_Port, FAN_Pin, GPIO_PIN_RESET);
+        }
     }
+
 
     adc_value1 = (float)adc_dma_buffer[0] / 4095.0f;
 
@@ -293,7 +292,7 @@ int main(void)
         previous_time = current_time;
 
         float now = current_time / 1000.0f;
-        float dt = PID_UPDATE_INTERVAL_MS / 1000.0f;
+        // float dt = PID_UPDATE_INTERVAL_MS / 1000.0f;
 
         air_target = GetTemperatureByMode(mode);
 
@@ -318,7 +317,7 @@ int main(void)
         float smart_setpoint = air_temp + air_error;
 
         // Умная логика принятия решения
-        float temp_error = air_target - air_temp;
+        // float temp_error = air_target - air_temp;
 
         if (air_temp > air_target + 0.1f)
         {
@@ -373,7 +372,7 @@ int main(void)
       NVIC_SystemReset();
     }
 
-    if (!heater_fault) {
+    if (!heater_fault && mode != 0) {
         if (pwm > HEATER_MIN_PWM) {
             if (!heater_warming_up) {
                 // Засекаем момент начала нагрева
@@ -460,8 +459,15 @@ int main(void)
         } else {
             if (!long_press_handled && (now - button_press_time > 2000)) {
                 mode = 0; // Долгое удержание — сброс
+                heater_setpoint = 0.0f;
                 long_press_handled = true;
                 __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, 0);
+                pwm = 0;
+                while (HAL_GPIO_ReadPin(MODE_GPIO_Port, MODE_Pin) == GPIO_PIN_RESET)
+                {
+                  reset_LEDs(3);
+                }
+                
             }
         }
     }
@@ -472,6 +478,10 @@ int main(void)
                 // Короткое нажатие
                 mode = (mode + 1) % 8;
             }
+            if (mode == 0)
+            {
+              reset_LEDs(5);
+            }
             // Сброс флагов
             button_was_pressed = false;
             long_press_handled = false;
@@ -480,6 +490,13 @@ int main(void)
     }
 
     Update_LEDs(mode, air_temp, 500);
+
+    // На всякий случай, а случаи разные бывают
+    if (mode == 0)
+    {
+        heater_setpoint = 0.0f;
+        SetHeaterPWM(0.0f); // или __HAL_TIM_SET_COMPARE(...) напрямую
+    }
 
     // HAL_IWDG_Refresh(&hiwdg);
     IWDG->KR = 0xAAAA;
@@ -737,6 +754,27 @@ void Update_LEDs(uint8_t mode, float current_temp, uint32_t speed)
     HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, ((mode & 0x01) && blink_state) ? GPIO_PIN_SET : GPIO_PIN_RESET);
     HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, ((mode & 0x02) && blink_state) ? GPIO_PIN_SET : GPIO_PIN_RESET);
     HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, ((mode & 0x04) && blink_state) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+}
+
+void reset_LEDs(uint8_t repeats)
+{
+  for (int i = 0; i < repeats; i++)
+  {
+    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
+    HAL_Delay(100);
+    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
+
+    HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
+    HAL_Delay(100);
+    HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
+
+    HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
+    HAL_Delay(100);
+    HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
+
+    HAL_Delay(200);
+    IWDG->KR = 0xAAAA;
+  }
 }
 
 

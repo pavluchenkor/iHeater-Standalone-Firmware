@@ -44,8 +44,9 @@
 #define AIR_MIN_TEMP_DELTA     2.0f   // Minimum required air temperature increase
 #define AIR_RESPONSE_TIMEOUT_MS (1000 * 60 * 10) // 10min
 
-#define FAN_ON_TEMP     40.0f
+#define FAN_ON_TEMP     55.0f
 #define FAN_OFF_TEMP    35.0f
+#define FAN_ON_ACTIVE_MODE_TEMP    40.0f
 
 
 // Temperature setpoints per mode
