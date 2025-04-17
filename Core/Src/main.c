@@ -480,7 +480,7 @@ int main(void)
             }
             if (mode == 0)
             {
-              reset_LEDs(5);
+              reset_LEDs(1);
             }
             // Сброс флагов
             button_was_pressed = false;
