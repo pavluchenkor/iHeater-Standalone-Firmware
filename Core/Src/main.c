@@ -55,9 +55,8 @@ uint8_t mode = 0;
 float adc_value1 = 0.0f;
 float adc_value2 = 0.0f;
 
-float air_temp = 0.0;
-float heater_temp = 0.0;
-
+float air_temp = 0.0f;
+float heater_temp = 0.0f;
 uint32_t previous_time = 0;
 
 // Температуры для режимов
@@ -189,8 +188,9 @@ int main(void)
       data->t3, data->r3);
 
   // Инициализация ПИД-регулятора
-  PID_Init(&pid_air, 6.0f, 3.0f, 3.0f, 30.0f, 110.0f, 0.25f, 110.0f);
-  PID_Init(&pid_heater, 2.0f, 0.5f, 0.2f, 0.0f, 100.0f, 0.25f, 100.0f);
+  PID_Init(&pid_air, 6.0f, 0.1f, 12.0f, 10.0f, 110.0f, 0.25f, 110.0f);
+  // PID_Init(&pid_heater, 2.0f, 0.5f, 4.0f, 0.0f, 100.0f, 0.25f, 100.0f);
+  PID_Init(&pid_heater, 3800.0f, 200.5f, 17650.0f, 0.0f, 100.0f, 0.25f, 100.0f);
 
 
   // Инициализация комбинированных фильтров с размером буфера 11 для медианного и скользящего среднего
@@ -219,7 +219,7 @@ int main(void)
   IWDG->KR = 0xAAAA; // Рефреш
 
   uint32_t code = LoadErrorCode();
-
+  // code = 0x06;
   if (code != ERROR_NONE && code != 0xFFFFFFFF)
   {
     float fake_temp = (code == ERROR_UNKNOWN) ? 100.0f : 0.0f;
@@ -307,14 +307,14 @@ int main(void)
             air_error *= scale;
         }
 
-        // Дополнительное усиление на этапе прогрева
-        if (air_error > 0.0f) {
-            float boost = 1.0f + air_error / 10.0f;
-            air_error *= boost;
-        }
+        // // Дополнительное усиление на этапе прогрева
+        // if (air_error > 0.0f) {
+        //     float boost = 1.0f + air_error / 10.0f;
+        //     air_error *= boost;
+        // }
 
         // Финальная цель для PID
-        float smart_setpoint = air_temp + air_error;
+        smart_setpoint = air_temp + air_error;
 
         // Умная логика принятия решения
         // float temp_error = air_target - air_temp;
@@ -333,9 +333,11 @@ int main(void)
           if (air_temp < air_target - 5.0f && heater_setpoint < min_setpoint)
             heater_setpoint = min_setpoint;
 
-          heater_setpoint = clamp(heater_setpoint, 30.0f, MAX_TEMP);
+          heater_setpoint += clamp(heater_setpoint, 30.0f, MAX_TEMP);
+          heater_setpoint /=2;
         }
 
+      
         // Внутренний PID: нагреватель -> PWM
         pwm = PID_Compute(&pid_heater, heater_temp, heater_setpoint, now);
 
@@ -348,6 +350,7 @@ int main(void)
 
 /*======================ПРОВЕРКИ============================*/
     
+
     if (air_temp <= MIN_AIR_TEMP)
     {
       SaveErrorCode(ERROR_THERMISTOR_OPEN_AIR);
@@ -366,7 +369,7 @@ int main(void)
       NVIC_SystemReset();
     }
 
-    if (heater_temp >= MAX_TEMP)
+    if (heater_temp >= MAX_TEMP + 10)
     {
       SaveErrorCode(ERROR_OVERHEAT_HEATER);
       NVIC_SystemReset();

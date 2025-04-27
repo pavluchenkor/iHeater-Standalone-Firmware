@@ -18,6 +18,10 @@ typedef struct {
 
     float min_deriv_time;
     float integral_limit;
+
+    float m_error;
+    float m_integral;
+    float m_deriv;
 } PID_Controller;
 
 void PID_Init(PID_Controller *pid, float Kp, float Ki, float Kd,

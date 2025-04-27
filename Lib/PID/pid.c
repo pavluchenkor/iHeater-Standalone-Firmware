@@ -29,7 +29,7 @@ void PID_Init(PID_Controller *pid, float Kp, float Ki, float Kd,
 
     pid->output_min = out_min;
     pid->output_max = out_max;
-
+    
     pid->integral = 0.0f;
     pid->last_temp = 0.0f;
     pid->last_time = 0.0f;
@@ -37,6 +37,11 @@ void PID_Init(PID_Controller *pid, float Kp, float Ki, float Kd,
 
     pid->min_deriv_time = min_deriv_time;
     pid->integral_limit = (Ki > 0.0f) ? max_power / Ki : 0.0f;
+
+    pid->m_error = 0.0f;
+    pid->m_integral = 0.0f;
+    pid->m_deriv = 0.0f;
+
 }
 
 float PID_Compute(PID_Controller *pid, float temp, float target, float now)
@@ -59,7 +64,7 @@ float PID_Compute(PID_Controller *pid, float temp, float target, float now)
 
     // clamp integral
     if (integral > pid->integral_limit) integral = pid->integral_limit;
-    if (integral < 0.0f) integral = 0.0f;
+    // if (integral < 0.0f) integral = 0.0f;
 
     float output = pid->Kp * error + pid->Ki * integral - pid->Kd * deriv;
 
@@ -73,6 +78,10 @@ float PID_Compute(PID_Controller *pid, float temp, float target, float now)
     pid->last_time = now;
     pid->last_temp = temp;
     pid->last_derivative = deriv;
+
+    pid->m_error    = error;
+    pid->m_integral = integral;
+    pid->m_deriv    = deriv;
 
     return bounded;
 }
