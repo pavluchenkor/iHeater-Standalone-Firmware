@@ -188,7 +188,7 @@ int main(void)
       data->t3, data->r3);
 
   // Инициализация ПИД-регулятора
-  PID_Init(&pid_air, 6.0f, 0.1f, 12.0f, 10.0f, 110.0f, 0.25f, 110.0f);
+  PID_Init(&pid_air, 6.0f, 0.1f, 12.0f, 10.0f, MAX_TEMP, 0.25f, 110.0f);
   // PID_Init(&pid_heater, 2.0f, 0.5f, 4.0f, 0.0f, 100.0f, 0.25f, 100.0f);
   PID_Init(&pid_heater, 3800.0f, 200.5f, 17650.0f, 0.0f, 100.0f, 0.25f, 100.0f);
 

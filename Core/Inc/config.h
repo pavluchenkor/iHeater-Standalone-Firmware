@@ -32,7 +32,7 @@
 #define PWM_STEPS 100               // PWM resolution (number of steps)
 #define DELTA 20                    // Delta between air and heater temperature
 #define MIN_TEMP 0                  // Set according to enclosure material
-#define MAX_TEMP 110                // Set according to enclosure material
+#define MAX_TEMP 130                // Set according to enclosure material
 #define MIN_AIR_TEMP 0              // Set according to enclosure material
 #define MAX_AIR_TEMP 90             // Set according to enclosure material
 #define PID_UPDATE_INTERVAL_MS 100  // PID update interval in milliseconds
