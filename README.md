@@ -34,7 +34,7 @@ This file contains all configurable parameters:
 | Parameter                                 | Description                                                                                   |
 | ----------------------------------------- | --------------------------------------------------------------------------------------------- |
 | `SELECTED_THERMISTOR_TYPE`                | Select thermistor type (0–5, see below)                                                       |
-| `MODE0`–`MODE7`                           | Setpoint temperatures for each mode. Can be any float value, e.g. `MODE4 67.5`                |
+| `MODE_TEMP_0`–`MODE_TEMP_7`                           | Setpoint temperatures for each mode. Can be any float value, e.g. `MODE_TEMP_4 67.5`                |
 | `MAX_TEMP`, `MIN_TEMP`                    | Allowed temperature range for the heater                                                      |
 | `MAX_AIR_TEMP`, `MIN_AIR_TEMP`            | Allowed temperature range for air                                                             |
 | `HEATER_MIN_PWM`                          | Minimum PWM required to start heater response monitoring                                      |
@@ -61,14 +61,14 @@ Each mode sets a target temperature and is displayed via binary LEDs:
 
 | Mode   | Temperature | LED3 | LED2 | LED1 |
 |--------|-------------|------|------|------|
-| MODE0  | 0.0°C       | 0    | 0    | 0    |
-| MODE1  | 55.0°C      | 0    | 0    | 1    |
-| MODE2  | 60.0°C      | 0    | 1    | 0    |
-| MODE3  | 65.0°C      | 0    | 1    | 1    |
-| MODE4  | 70.0°C      | 1    | 0    | 0    |
-| MODE5  | 75.0°C      | 1    | 0    | 1    |
-| MODE6  | 80.0°C      | 1    | 1    | 0    |
-| MODE7  | 85.0°C      | 1    | 1    | 1    |
+| MODE_TEMP_0  | 0.0°C       | 0    | 0    | 0    |
+| MODE_TEMP_1  | 55.0°C      | 0    | 0    | 1    |
+| MODE_TEMP_2  | 60.0°C      | 0    | 1    | 0    |
+| MODE_TEMP_3  | 65.0°C      | 0    | 1    | 1    |
+| MODE_TEMP_4  | 70.0°C      | 1    | 0    | 0    |
+| MODE_TEMP_5  | 75.0°C      | 1    | 0    | 1    |
+| MODE_TEMP_6  | 80.0°C      | 1    | 1    | 0    |
+| MODE_TEMP_7  | 85.0°C      | 1    | 1    | 1    |
 
 ---
 
@@ -82,7 +82,7 @@ If you haven't made code changes, a ready-to-use `.bin` file is located in the `
 Firmware/iHeater_v1.2.3.bin
 ```
 
-This firmware is pre-configured with the temperature modes from MODE0 to MODE7 (as described above) and designed to work with a Generic 3950 thermistor (type 3 in `config.h`).
+This firmware is pre-configured with the temperature modes from MODE_TEMP_0 to MODE_TEMP_7 (as described above) and designed to work with a Generic 3950 thermistor (type 3 in `config.h`).
 
 ### Using DFU (USB)
 
@@ -108,7 +108,7 @@ This firmware is pre-configured with the temperature modes from MODE0 to MODE7 (
 ## How to Use
 
 - **Short press** MODE button — cycle through temperature modes (0–7)
-- **Long press (2+ seconds)** — reset to MODE0 (OFF)
+- **Long press (2+ seconds)** — reset to MODE_TEMP_0 (OFF)
 - **LEDs** indicate current mode in binary (see table above)
 - **Blinking LEDs** — heating in progress
 - **Solid LEDs** — target temperature reached

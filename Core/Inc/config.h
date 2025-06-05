@@ -1,3 +1,7 @@
+enum Mode {
+    MODE_0, MODE_1, MODE_2, MODE_3, MODE_4, MODE_5, MODE_6, MODE_7
+};
+
 #define ERROR_NONE                      0x00  // No error
 // LED1=OFF, LED2=OFF, LED3=OFF
 
@@ -37,6 +41,16 @@
 #define MAX_AIR_TEMP 90             // Set according to enclosure material
 #define PID_UPDATE_INTERVAL_MS 100  // PID update interval in milliseconds
 
+/**************************************
+************ USER SETTINGS ************
+***************************************/
+
+#define BOARD_REV_1_0   0
+#define BOARD_REV_1_1   1
+
+// >>> Specify the desired version:
+#define BOARD_REVISION  BOARD_REV_1_1
+
 #define HEATER_RESPONSE_TIMEOUT_MS (1000 * 60 * 3)      // Time to wait for heater response
 #define HEATER_MIN_TEMP_DELTA     0.1f                  // Minimum required temperature increase
 #define HEATER_MIN_PWM            80.0f                 // Minimum PWM value for response check
@@ -48,16 +62,19 @@
 #define FAN_OFF_TEMP    35.0f
 #define FAN_ON_ACTIVE_MODE_TEMP    40.0f
 
+#define TRIGGER_ON_TEMP  45.0f
+#define TRIGGER_OFF_TEMP 80.0f
+#define TRIGGER_MODE MODE_2
 
 // Temperature setpoints per mode
-#define MODE0 0.0f
-#define MODE1 55.0f
-#define MODE2 60.0f
-#define MODE3 65.0f
-#define MODE4 70.0f
-#define MODE5 75.0f
-#define MODE6 80.0f
-#define MODE7 85.0f
+#define MODE_TEMP_0 0.0f
+#define MODE_TEMP_1 55.0f
+#define MODE_TEMP_2 60.0f
+#define MODE_TEMP_3 65.0f
+#define MODE_TEMP_4 70.0f
+#define MODE_TEMP_5 75.0f
+#define MODE_TEMP_6 80.0f
+#define MODE_TEMP_7 85.0f
 
 // Thermistor type selection macros
 #define THERMISTOR_TYPE_0 0  // ATC Semitec 104GT-2
@@ -69,3 +86,15 @@
 
 //!! Select thermistor type here
 #define SELECTED_THERMISTOR_TYPE THERMISTOR_TYPE_3
+
+// Actual resistance of the pull-up resistors
+#define PULLUP_TH0 4460.0f
+#define PULLUP_TH1 4450.0f
+#define PULLUP_TH2 4450.0f
+
+// Resistor wire resistance
+#define INLINE_RESISTOR_TH0 0.0f
+#define INLINE_RESISTOR_TH1 0.0f
+#define INLINE_RESISTOR_TH2 0.0f
+
+#define ALPHA 0.05f

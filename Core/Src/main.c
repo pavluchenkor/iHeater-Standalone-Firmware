@@ -21,11 +21,13 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdbool.h>
 #include "stm32f0xx_hal.h"
 #include "thermistor.h"
 #include "config.h"
 #include "pid.h"
 #include "median_filter.h"
+#include "ema_filter.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -50,17 +52,56 @@ DMA_HandleTypeDef hdma_adc;
 TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
-uint8_t mode = 0;
+#if BOARD_REVISION == BOARD_REV_1_0
+  #define ADC_CHANNEL_COUNT 2
+#elif BOARD_REVISION == BOARD_REV_1_1
+  #define ADC_CHANNEL_COUNT 3
+#else
+  #error "Unknown board revision"
+#endif
 
+#define ADC_SAMPLES 10
+
+uint16_t adc_dma_buffer[ADC_CHANNEL_COUNT * ADC_SAMPLES];
+float adc_sum[ADC_CHANNEL_COUNT] = {0};
+float adc_value[ADC_CHANNEL_COUNT] = {0};
+float temperatures[ADC_CHANNEL_COUNT] = {0};
+
+Thermistor thermistors[ADC_CHANNEL_COUNT];
+EmaFilter filters[ADC_CHANNEL_COUNT];
+
+const float pullups[] = {
+    PULLUP_TH0,
+    PULLUP_TH1,
+#if ADC_CHANNEL_COUNT == 3
+    PULLUP_TH2,
+#endif
+};
+
+const float inline_resistors[] = {
+    INLINE_RESISTOR_TH0,
+    INLINE_RESISTOR_TH1,
+#if ADC_CHANNEL_COUNT == 3
+    INLINE_RESISTOR_TH2,
+#endif
+};
+
+enum Mode mode = MODE_0;
+
+float adc_value0 = 0.0f;
 float adc_value1 = 0.0f;
 float adc_value2 = 0.0f;
 
 float air_temp = 0.0f;
 float heater_temp = 0.0f;
+float trigger_temp = 0.0f;
 uint32_t previous_time = 0;
 
+volatile bool trigger_heater_enabled = false;
+volatile bool trigger_state_reached = false;
+
 // Температуры для режимов
-const float mode_temperatures[] = {MODE0, MODE1, MODE2, MODE3, MODE4, MODE5, MODE6, MODE7};
+const float mode_temperatures[] = {MODE_TEMP_0, MODE_TEMP_1, MODE_TEMP_2, MODE_TEMP_3, MODE_TEMP_4, MODE_TEMP_5, MODE_TEMP_6, MODE_TEMP_7};
 
 volatile float output = 0.0f;
 volatile uint8_t timer_counter = 0;
@@ -71,7 +112,7 @@ bool heater_warming_up = false;
 bool heater_fault = false;
 
 
-uint8_t last_mode = 0;
+uint8_t last_mode = MODE_0;
 uint32_t air_target_timer = 0;
 bool air_target_tracking = false;
 bool was_mode_zero = true;
@@ -115,7 +156,7 @@ void reset_LEDs(uint8_t repeats);
 // WDT
 IWDG_HandleTypeDef hiwdg;
 
-Thermistor therm1, therm2;
+Thermistor therm0, therm1, therm2;
 
 PID_Controller pid_air;
 PID_Controller pid_heater;
@@ -123,6 +164,11 @@ PID_Controller pid_heater;
 // Объявление фильтров
 CombinedFilter combined_heater;
 CombinedFilter combined_air;
+CombinedFilter combined_trigger;
+
+EmaFilter filter_heater;
+EmaFilter filter_air;
+EmaFilter filter_trigger;
 /* USER CODE END 0 */
 
 /**
@@ -161,10 +207,15 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
 
- HAL_ADCEx_Calibration_Start(&hadc);
-  uint16_t adc_dma_buffer[2]; // Буфер для двух каналов
-  if (HAL_ADC_Start_DMA(&hadc, (uint32_t*)adc_dma_buffer, 2) != HAL_OK) {
-      Error_Handler(); // Если ADC не запустился
+//  HAL_ADCEx_Calibration_Start(&hadc);
+//   uint16_t adc_dma_buffer[30]; // Буфер для двух каналов
+//   if (HAL_ADC_Start_DMA(&hadc, (uint32_t*)adc_dma_buffer, 30) != HAL_OK) {
+//       Error_Handler(); // Если ADC не запустился
+//   }
+
+  HAL_ADCEx_Calibration_Start(&hadc);
+  if (HAL_ADC_Start_DMA(&hadc, (uint32_t*)adc_dma_buffer, ADC_CHANNEL_COUNT * ADC_SAMPLES) != HAL_OK) {
+      Error_Handler();
   }
 
   // Инициализация термисторов
@@ -173,45 +224,49 @@ int main(void)
       Error_Handler(); // Если тип некорректен
   }
 
-  // Инициализируем первый термистор
-  thermistor_init(&therm1, 4700.0f, 0.0f);
-  thermistor_set_coefficients(&therm1,
-      data->t1, data->r1,
-      data->t2, data->r2,
-      data->t3, data->r3);
+  // // Инициализируем первый термистор
+  // thermistor_init(&therm0, PULLUP_TH0, INLINE_RESISTOR_TH0);
+  // thermistor_set_coefficients(&therm0,
+  //     data->t1, data->r1,
+  //     data->t2, data->r2,
+  //     data->t3, data->r3);
 
-  // Инициализируем второй термистор
-  thermistor_init(&therm2, 4700.0f, 0.0f);
-  thermistor_set_coefficients(&therm2,
-      data->t1, data->r1,
-      data->t2, data->r2,
-      data->t3, data->r3);
+  // // Инициализируем второй термистор
+  // thermistor_init(&therm1, PULLUP_TH1, INLINE_RESISTOR_TH1);
+  // thermistor_set_coefficients(&therm1,
+  //     data->t1, data->r1,
+  //     data->t2, data->r2,
+  //     data->t3, data->r3);
+
+  //     // Инициализируем третий термистор
+  // thermistor_init(&therm2, PULLUP_TH2, INLINE_RESISTOR_TH2);
+  // thermistor_set_coefficients(&therm2,
+  //     data->t1, data->r1,
+  //     data->t2, data->r2,
+  //     data->t3, data->r3);
+
+  for (int i = 0; i < ADC_CHANNEL_COUNT; i++) {
+      thermistor_init(&thermistors[i], pullups[i], inline_resistors[i]);
+      thermistor_set_coefficients(&thermistors[i],
+          data->t1, data->r1,
+          data->t2, data->r2,
+          data->t3, data->r3);
+  }
 
   // Инициализация ПИД-регулятора
   PID_Init(&pid_air, 6.0f, 0.1f, 12.0f, 10.0f, MAX_TEMP, 0.25f, 110.0f);
   // PID_Init(&pid_heater, 2.0f, 0.5f, 4.0f, 0.0f, 100.0f, 0.25f, 100.0f);
   PID_Init(&pid_heater, 3800.0f, 200.5f, 17650.0f, 0.0f, 100.0f, 0.25f, 100.0f);
 
+  // ema_filter_init(&filter_heater, ALPHA); 
+  // ema_filter_init(&filter_air, ALPHA); 
+  // ema_filter_init(&filter_trigger, ALPHA); 
+  for (int ch = 0; ch < ADC_CHANNEL_COUNT; ch++) {
+    ema_filter_init(&filters[ch], ALPHA);
+}
 
-  // Инициализация комбинированных фильтров с размером буфера 11 для медианного и скользящего среднего
-  if (!combined_filter_init(&combined_heater, 11, 11))
-  {
-    Error_Handler();
-  }
 
-  if (!combined_filter_init(&combined_air, 11, 11))
-  {
-    combined_filter_deinit(&combined_heater);
-    Error_Handler();
-  }
-
-  // Инициализация начальных значений фильтров
-  for (uint8_t i = 0; i < 11; i++)
-  {
-    combined_filter_update(&combined_heater, 25.0f); // Предположим начальную температуру 25°C
-    combined_filter_update(&combined_air, 25.0f);
-  }
-  mode = 0;
+  mode = MODE_0;
   Update_LEDs(mode, air_temp, 0);
 
   MX_IWDG_Init();
@@ -242,6 +297,8 @@ int main(void)
     HAL_GPIO_WritePin(FAN_GPIO_Port, FAN_Pin, GPIO_PIN_RESET);
   }
 
+  reset_LEDs(10);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -249,7 +306,7 @@ int main(void)
   while (1)
   {
 
-    if (mode == 0)
+    if (mode == MODE_0)
     {
         // В режиме 0 смотрим только на нагреватель
         if (heater_temp > FAN_ON_TEMP)
@@ -274,17 +331,49 @@ int main(void)
         }
     }
 
+    // float adc_sum0 = 0.0f;
+    // float adc_sum1 = 0.0f;
+    // float adc_sum2 = 0.0f;
 
-    adc_value1 = (float)adc_dma_buffer[0] / 4095.0f;
+    // for (int i = 0; i < 10; i++) {
+    //     adc_sum0 += adc_dma_buffer[i * 3 + 0]; // канал 0
+    //     adc_sum1 += adc_dma_buffer[i * 3 + 1]; // канал 1
+    //     adc_sum2 += adc_dma_buffer[i * 3 + 2]; // канал 2
+    // }
 
-    adc_value2 = (float)adc_dma_buffer[1] / 4095.0f;
+    // adc_value0 = adc_sum0 / 10.0f / 4095.0f; // нормализованное значение 0..1
+    // adc_value1 = adc_sum1 / 10.0f / 4095.0f;
+    // adc_value2 = adc_sum2 / 10.0f / 4095.0f;
 
-    // Обновление комбинированных фильтров
-    float filtered_air = combined_filter_update(&combined_air, adc_value1);
-    float filtered_heater = combined_filter_update(&combined_heater, adc_value2);
+    // float filtered_air     = ema_filter_update(&filter_heater, adc_value0);
+    // float filtered_heater  = ema_filter_update(&filter_air, adc_value1);
+    // float filtered_trigger = ema_filter_update(&filter_trigger, adc_value2);
 
-    air_temp     = thermistor_calc_temp(&therm2, filtered_air);    // датчик воздуха
-    heater_temp  = thermistor_calc_temp(&therm1, filtered_heater);  // датчик нагревателя
+
+
+    // Обнуляем суммы перед накоплением
+    for (int ch = 0; ch < ADC_CHANNEL_COUNT; ch++) {
+        adc_sum[ch] = 0.0f;
+    }
+
+    for (int i = 0; i < ADC_SAMPLES; i++) {
+        for (int ch = 0; ch < ADC_CHANNEL_COUNT; ch++) {
+            adc_sum[ch] += adc_dma_buffer[i * ADC_CHANNEL_COUNT + ch];
+        }
+    }
+
+    for (int ch = 0; ch < ADC_CHANNEL_COUNT; ch++) {
+        adc_value[ch] = adc_sum[ch] / ADC_SAMPLES / 4095.0f;
+        float filtered = ema_filter_update(&filters[ch], adc_value[ch]);
+        temperatures[ch] = thermistor_calc_temp(&thermistors[ch], filtered);
+    }
+
+    // heater_temp   = thermistor_calc_temp(&therm0, filtered_heater);  // датчик нагревателя
+    // air_temp      = thermistor_calc_temp(&therm1, filtered_air);     // датчик воздуха
+    // trigger_temp  = thermistor_calc_temp(&therm2, filtered_trigger);  // датчик триггер
+
+    heater_temp   = temperatures[0];
+    air_temp      = temperatures[1];
 
     uint32_t current_time = HAL_GetTick();
 
@@ -321,12 +410,12 @@ int main(void)
 
         if (air_temp > air_target + 0.1f)
         {
-          // Сильно перегрет — сбрасываем
+          // Сильно перегрет - сбрасываем
           heater_setpoint = 0.0f;
         }
         else
         {
-          // Основной PID — всегда, пока не перегрет
+          // Основной PID - всегда, пока не перегрет
           heater_setpoint = PID_Compute(&pid_air, air_temp, smart_setpoint, now);
 
           float min_setpoint = air_target + 10.0f;
@@ -347,10 +436,7 @@ int main(void)
         __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, pulse);
     }
 
-
 /*======================ПРОВЕРКИ============================*/
-    
-
     if (air_temp <= MIN_AIR_TEMP)
     {
       SaveErrorCode(ERROR_THERMISTOR_OPEN_AIR);
@@ -375,7 +461,7 @@ int main(void)
       NVIC_SystemReset();
     }
 
-    if (!heater_fault && mode != 0) {
+    if (!heater_fault && mode != MODE_TEMP_0) {
         if (pwm > HEATER_MIN_PWM) {
             if (!heater_warming_up) {
                 // Засекаем момент начала нагрева
@@ -383,18 +469,18 @@ int main(void)
                 heater_start_temp = heater_temp;
                 heater_warming_up = true;
             } else {
-                // Уже греем — проверим прогресс
+                // Уже греем - проверим прогресс
                 if (heater_temp > heater_start_temp + HEATER_MIN_TEMP_DELTA) {
-                    // Температура начала расти — всё норм
+                    // Температура начала расти - всё норм
                     heater_warming_up = false;
                 } else if (HAL_GetTick() - heater_start_time > HEATER_RESPONSE_TIMEOUT_MS) {
-                    // Время вышло, а температура не изменилась — ошибка
+                    // Время вышло, а температура не изменилась - ошибка
                     heater_fault = true;
                     heater_warming_up = false;
                 }
             }
         } else {
-            // PWM упал — сбрасываем ожидание
+            // PWM упал - сбрасываем ожидание
             heater_warming_up = false;
         }
     }
@@ -405,9 +491,9 @@ int main(void)
       NVIC_SystemReset();  
     }
 
-    if (!air_fault && mode != 0)
+    if (!air_fault && mode != MODE_TEMP_0)
     {
-      // Если температура уже достигнута — не отслеживаем
+      // Если температура уже достигнута - не отслеживаем
       if (air_temp >= air_target - 5.0f)
       {
         air_warming_up = false;
@@ -421,15 +507,15 @@ int main(void)
       }
       else
       {
-        // Уже отслеживаем — проверим прогресс
+        // Уже отслеживаем - проверим прогресс
         if (air_temp > air_start_temp + AIR_MIN_TEMP_DELTA)
         {
-          // Нагрев пошёл — всё хорошо
+          // Нагрев пошёл - всё хорошо
           air_warming_up = false;
         }
         else if (HAL_GetTick() - air_start_time > AIR_RESPONSE_TIMEOUT_MS)
         {
-          // Время вышло — ошибка
+          // Время вышло - ошибка
           air_fault = true;
           air_warming_up = false;
         }
@@ -446,7 +532,41 @@ int main(void)
         NVIC_SystemReset();  
     }
 /*=================ПРОВЕРКИ  КОНЕЦ============================*/
-  
+
+#if BOARD_REVISION == BOARD_REV_1_1
+/*=========================ТРИГГЕР============================*/
+    trigger_temp  = temperatures[2];
+    // Один раз срабатывает при первом превышении
+    if (!trigger_heater_enabled && mode == MODE_0 && trigger_temp >= TRIGGER_ON_TEMP)
+    {
+      trigger_heater_enabled = true;
+      mode = TRIGGER_MODE;
+    }
+
+    // При достижении целевой температуры стола + 10С
+    if (!trigger_state_reached && trigger_heater_enabled && mode != MODE_0 && trigger_temp > TRIGGER_OFF_TEMP + 5)
+    {
+      trigger_state_reached = true;
+    }
+
+    // Выключаем, если температура упала ниже OFF
+    if (trigger_state_reached && trigger_temp <= TRIGGER_OFF_TEMP && mode != MODE_0)
+    {
+      mode = MODE_0;
+      trigger_heater_enabled = false;
+      // НЕ сбрасываем trigger_state_reached - он останется true
+      // пока не наступит новое задание (печать)
+    }
+
+    // Сброс флага включения триггера для повторного запуска нагрева
+    if (mode == MODE_0 && trigger_state_reached && trigger_temp <= TRIGGER_ON_TEMP - 5)
+    {
+      // Не активен в этом режиме, сбрасываем флаг
+      trigger_state_reached = false;
+    }
+/*=====================ТРИГГЕР КОНЕЦ==========================*/
+#endif
+
     static uint32_t button_press_time = 0;
     static bool button_was_pressed = false;
     static bool long_press_handled = false;
@@ -459,13 +579,15 @@ int main(void)
             button_was_pressed = true;
             button_press_time = now;
             long_press_handled = false;
-        } else {
+        } else {  // Долгое удержание - сброс
             if (!long_press_handled && (now - button_press_time > 2000)) {
-                mode = 0; // Долгое удержание — сброс
-                heater_setpoint = 0.0f;
+                mode = MODE_0;
+                heater_setpoint = MODE_TEMP_0;
+                air_target = 0.0f;
                 long_press_handled = true;
                 __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, 0);
                 pwm = 0;
+                
                 while (HAL_GPIO_ReadPin(MODE_GPIO_Port, MODE_Pin) == GPIO_PIN_RESET)
                 {
                   reset_LEDs(3);
@@ -481,7 +603,7 @@ int main(void)
                 // Короткое нажатие
                 mode = (mode + 1) % 8;
             }
-            if (mode == 0)
+            if (mode == MODE_0)
             {
               reset_LEDs(1);
             }
@@ -492,12 +614,21 @@ int main(void)
         }
     }
 
+
     Update_LEDs(mode, air_temp, 500);
 
     // На всякий случай, а случаи разные бывают
-    if (mode == 0)
+    if (mode == MODE_0)
     {
+        // // Сброс состояний триггера
+        // if(trigger_heater_enabled || trigger_state_reached)
+        //   {
+        //     trigger_heater_enabled = false;
+        //     trigger_state_reached = false;
+        //   }
+
         heater_setpoint = 0.0f;
+        air_target = 0.0f;
         SetHeaterPWM(0.0f); // или __HAL_TIM_SET_COMPARE(...) напрямую
     }
 
@@ -523,9 +654,7 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  // RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI14|RCC_OSCILLATORTYPE_HSI48;
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI | RCC_OSCILLATORTYPE_HSI14 | RCC_OSCILLATORTYPE_HSI48;
-  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI14|RCC_OSCILLATORTYPE_HSI48;
   RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
   RCC_OscInitStruct.HSI14State = RCC_HSI14_ON;
   RCC_OscInitStruct.HSI14CalibrationValue = 16;
@@ -546,11 +675,6 @@ void SystemClock_Config(void)
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
   {
     Error_Handler();
-  }
-  // Проверка, что LSI запустился
-  if (__HAL_RCC_GET_FLAG(RCC_FLAG_LSIRDY) == RESET)
-  {
-    Error_Handler(); // LSI не стартанул
   }
 }
 
@@ -612,6 +736,16 @@ static void MX_ADC_Init(void)
     Error_Handler();
   }
 
+  /** Configure for the selected ADC regular channel to be converted.
+  */
+#if BOARD_REVISION == BOARD_REV_1_1
+  sConfig.Channel = ADC_CHANNEL_9;
+  if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+#endif
+
   /** Configure the analog watchdog
   */
   AnalogWDGConfig.WatchdogMode = ADC_ANALOGWATCHDOG_SINGLE_REG;
@@ -634,6 +768,7 @@ static void MX_ADC_Init(void)
   * @param None
   * @retval None
   */
+
 static void MX_TIM2_Init(void)
 {
 
@@ -704,11 +839,12 @@ static void MX_DMA_Init(void)
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
-/* USER CODE BEGIN MX_GPIO_Init_1 */
-/* USER CODE END MX_GPIO_Init_1 */
+  /* USER CODE BEGIN MX_GPIO_Init_1 */
+  /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, FAN_Pin|LED3_Pin|LED2_Pin|LED1_Pin, GPIO_PIN_RESET);
@@ -726,8 +862,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(MODE_GPIO_Port, &GPIO_InitStruct);
 
-/* USER CODE BEGIN MX_GPIO_Init_2 */
-/* USER CODE END MX_GPIO_Init_2 */
+  /* USER CODE BEGIN MX_GPIO_Init_2 */
+  /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */

@@ -749,8 +749,8 @@ typedef  void (*pTIM_CallbackTypeDef)(TIM_HandleTypeDef *htim);  /*!< pointer to
   * @{
   */
 #define TIM_CLOCKSOURCE_INTERNAL    TIM_SMCR_ETPS_0      /*!< Internal clock source                                 */
-#define TIM_CLOCKSOURCE_ETRMODE1    TIM_TS_ETRF          /*!< External clock source mode 1 (ETRF)                   */
-#define TIM_CLOCKSOURCE_ETRMODE2    TIM_SMCR_ETPS_1      /*!< External clock source mode 2                          */
+#define TIM_CLOCKSOURCE_ETRMODE_TEMP_1    TIM_TS_ETRF          /*!< External clock source mode 1 (ETRF)                   */
+#define TIM_CLOCKSOURCE_ETRMODE_TEMP_2    TIM_SMCR_ETPS_1      /*!< External clock source mode 2                          */
 #define TIM_CLOCKSOURCE_TI1ED       TIM_TS_TI1F_ED       /*!< External clock source mode 1 (TTI1FP1 + edge detect.) */
 #define TIM_CLOCKSOURCE_TI1         TIM_TS_TI1FP1        /*!< External clock source mode 1 (TTI1FP1)                */
 #define TIM_CLOCKSOURCE_TI2         TIM_TS_TI2FP2        /*!< External clock source mode 1 (TTI2FP2)                */
@@ -1664,8 +1664,8 @@ typedef  void (*pTIM_CallbackTypeDef)(TIM_HandleTypeDef *htim);  /*!< pointer to
                                                     ((__CHANNEL__) == TIM_CHANNEL_3))
 
 #define IS_TIM_CLOCKSOURCE(__CLOCK__) (((__CLOCK__) == TIM_CLOCKSOURCE_INTERNAL) || \
-                                       ((__CLOCK__) == TIM_CLOCKSOURCE_ETRMODE1) || \
-                                       ((__CLOCK__) == TIM_CLOCKSOURCE_ETRMODE2) || \
+                                       ((__CLOCK__) == TIM_CLOCKSOURCE_ETRMODE_TEMP_1) || \
+                                       ((__CLOCK__) == TIM_CLOCKSOURCE_ETRMODE_TEMP_2) || \
                                        ((__CLOCK__) == TIM_CLOCKSOURCE_TI1ED)    || \
                                        ((__CLOCK__) == TIM_CLOCKSOURCE_TI1)      || \
                                        ((__CLOCK__) == TIM_CLOCKSOURCE_TI2)      || \

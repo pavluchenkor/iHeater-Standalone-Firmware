@@ -3008,7 +3008,7 @@ HAL_StatusTypeDef HAL_TIM_OnePulse_Stop_IT(TIM_HandleTypeDef *htim, uint32_t Out
   *         Ex: call @ref HAL_TIM_Encoder_DeInit() before HAL_TIM_Encoder_Init()
   * @note   Encoder mode and External clock mode 2 are not compatible and must not be selected together
   *         Ex: A call for @ref HAL_TIM_Encoder_Init will erase the settings of @ref HAL_TIM_ConfigClockSource
-  *         using TIM_CLOCKSOURCE_ETRMODE2 and vice versa
+  *         using TIM_CLOCKSOURCE_ETRMODE_TEMP_2 and vice versa
   * @note   When the timer instance is initialized in Encoder mode, timer
   *         channels 1 and channel 2 are reserved and cannot be used for other
   *         purpose.
@@ -5337,10 +5337,10 @@ HAL_StatusTypeDef HAL_TIM_ConfigClockSource(TIM_HandleTypeDef *htim, const TIM_C
       break;
     }
 
-    case TIM_CLOCKSOURCE_ETRMODE1:
+    case TIM_CLOCKSOURCE_ETRMODE_TEMP_1:
     {
       /* Check whether or not the timer instance supports external trigger input mode 1 (ETRF)*/
-      assert_param(IS_TIM_CLOCKSOURCE_ETRMODE1_INSTANCE(htim->Instance));
+      assert_param(IS_TIM_CLOCKSOURCE_ETRMODE_TEMP_1_INSTANCE(htim->Instance));
 
       /* Check ETR input conditioning related parameters */
       assert_param(IS_TIM_CLOCKPRESCALER(sClockSourceConfig->ClockPrescaler));
@@ -5353,18 +5353,18 @@ HAL_StatusTypeDef HAL_TIM_ConfigClockSource(TIM_HandleTypeDef *htim, const TIM_C
                         sClockSourceConfig->ClockPolarity,
                         sClockSourceConfig->ClockFilter);
 
-      /* Select the External clock mode1 and the ETRF trigger */
+      /* Select the External clock MODE_TEMP_1 and the ETRF trigger */
       tmpsmcr = htim->Instance->SMCR;
-      tmpsmcr |= (TIM_SLAVEMODE_EXTERNAL1 | TIM_CLOCKSOURCE_ETRMODE1);
+      tmpsmcr |= (TIM_SLAVEMODE_EXTERNAL1 | TIM_CLOCKSOURCE_ETRMODE_TEMP_1);
       /* Write to TIMx SMCR */
       htim->Instance->SMCR = tmpsmcr;
       break;
     }
 
-    case TIM_CLOCKSOURCE_ETRMODE2:
+    case TIM_CLOCKSOURCE_ETRMODE_TEMP_2:
     {
       /* Check whether or not the timer instance supports external trigger input mode 2 (ETRF)*/
-      assert_param(IS_TIM_CLOCKSOURCE_ETRMODE2_INSTANCE(htim->Instance));
+      assert_param(IS_TIM_CLOCKSOURCE_ETRMODE_TEMP_2_INSTANCE(htim->Instance));
 
       /* Check ETR input conditioning related parameters */
       assert_param(IS_TIM_CLOCKPRESCALER(sClockSourceConfig->ClockPrescaler));
@@ -5376,7 +5376,7 @@ HAL_StatusTypeDef HAL_TIM_ConfigClockSource(TIM_HandleTypeDef *htim, const TIM_C
                         sClockSourceConfig->ClockPrescaler,
                         sClockSourceConfig->ClockPolarity,
                         sClockSourceConfig->ClockFilter);
-      /* Enable the External clock mode2 */
+      /* Enable the External clock MODE_TEMP_2 */
       htim->Instance->SMCR |= TIM_SMCR_ECE;
       break;
     }
@@ -7156,7 +7156,7 @@ static HAL_StatusTypeDef TIM_SlaveTimer_SetConfig(TIM_HandleTypeDef *htim,
     case TIM_TS_ETRF:
     {
       /* Check the parameters */
-      assert_param(IS_TIM_CLOCKSOURCE_ETRMODE1_INSTANCE(htim->Instance));
+      assert_param(IS_TIM_CLOCKSOURCE_ETRMODE_TEMP_1_INSTANCE(htim->Instance));
       assert_param(IS_TIM_TRIGGERPRESCALER(sSlaveConfig->TriggerPrescaler));
       assert_param(IS_TIM_TRIGGERPOLARITY(sSlaveConfig->TriggerPolarity));
       assert_param(IS_TIM_TRIGGERFILTER(sSlaveConfig->TriggerFilter));

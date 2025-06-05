@@ -733,8 +733,8 @@ typedef struct
   * @{
   */
 #define LL_TIM_CLOCKSOURCE_INTERNAL            0x00000000U                                          /*!< The timer is clocked by the internal clock provided from the RCC */
-#define LL_TIM_CLOCKSOURCE_EXT_MODE1           (TIM_SMCR_SMS_2 | TIM_SMCR_SMS_1 | TIM_SMCR_SMS_0)   /*!< Counter counts at each rising or falling edge on a selected input*/
-#define LL_TIM_CLOCKSOURCE_EXT_MODE2           TIM_SMCR_ECE                                         /*!< Counter counts at each rising or falling edge on the external trigger input ETR */
+#define LL_TIM_CLOCKSOURCE_EXT_MODE_TEMP_1           (TIM_SMCR_SMS_2 | TIM_SMCR_SMS_1 | TIM_SMCR_SMS_0)   /*!< Counter counts at each rising or falling edge on a selected input*/
+#define LL_TIM_CLOCKSOURCE_EXT_MODE_TEMP_2           TIM_SMCR_ECE                                         /*!< Counter counts at each rising or falling edge on the external trigger input ETR */
 /**
   * @}
   */
@@ -2592,8 +2592,8 @@ __STATIC_INLINE uint32_t LL_TIM_IC_GetCaptureCH4(const TIM_TypeDef *TIMx)
 /**
   * @brief  Enable external clock mode 2.
   * @note When external clock mode 2 is enabled the counter is clocked by any active edge on the ETRF signal.
-  * @note Macro IS_TIM_CLOCKSOURCE_ETRMODE2_INSTANCE(TIMx) can be used to check
-  *       whether or not a timer instance supports external clock mode2.
+  * @note Macro IS_TIM_CLOCKSOURCE_ETRMODE_TEMP_2_INSTANCE(TIMx) can be used to check
+  *       whether or not a timer instance supports external clock MODE_TEMP_2.
   * @rmtoll SMCR         ECE           LL_TIM_EnableExternalClock
   * @param  TIMx Timer instance
   * @retval None
@@ -2605,8 +2605,8 @@ __STATIC_INLINE void LL_TIM_EnableExternalClock(TIM_TypeDef *TIMx)
 
 /**
   * @brief  Disable external clock mode 2.
-  * @note Macro IS_TIM_CLOCKSOURCE_ETRMODE2_INSTANCE(TIMx) can be used to check
-  *       whether or not a timer instance supports external clock mode2.
+  * @note Macro IS_TIM_CLOCKSOURCE_ETRMODE_TEMP_2_INSTANCE(TIMx) can be used to check
+  *       whether or not a timer instance supports external clock MODE_TEMP_2.
   * @rmtoll SMCR         ECE           LL_TIM_DisableExternalClock
   * @param  TIMx Timer instance
   * @retval None
@@ -2618,8 +2618,8 @@ __STATIC_INLINE void LL_TIM_DisableExternalClock(TIM_TypeDef *TIMx)
 
 /**
   * @brief  Indicate whether external clock mode 2 is enabled.
-  * @note Macro IS_TIM_CLOCKSOURCE_ETRMODE2_INSTANCE(TIMx) can be used to check
-  *       whether or not a timer instance supports external clock mode2.
+  * @note Macro IS_TIM_CLOCKSOURCE_ETRMODE_TEMP_2_INSTANCE(TIMx) can be used to check
+  *       whether or not a timer instance supports external clock MODE_TEMP_2.
   * @rmtoll SMCR         ECE           LL_TIM_IsEnabledExternalClock
   * @param  TIMx Timer instance
   * @retval State of bit (1 or 0).
@@ -2635,17 +2635,17 @@ __STATIC_INLINE uint32_t LL_TIM_IsEnabledExternalClock(const TIM_TypeDef *TIMx)
   *       the external clock is applied is selected by calling the @ref LL_TIM_SetTriggerInput()
   *       function. This timer input must be configured by calling
   *       the @ref LL_TIM_IC_Config() function.
-  * @note Macro IS_TIM_CLOCKSOURCE_ETRMODE1_INSTANCE(TIMx) can be used to check
-  *       whether or not a timer instance supports external clock mode1.
-  * @note Macro IS_TIM_CLOCKSOURCE_ETRMODE2_INSTANCE(TIMx) can be used to check
-  *       whether or not a timer instance supports external clock mode2.
+  * @note Macro IS_TIM_CLOCKSOURCE_ETRMODE_TEMP_1_INSTANCE(TIMx) can be used to check
+  *       whether or not a timer instance supports external clock MODE_TEMP_1.
+  * @note Macro IS_TIM_CLOCKSOURCE_ETRMODE_TEMP_2_INSTANCE(TIMx) can be used to check
+  *       whether or not a timer instance supports external clock MODE_TEMP_2.
   * @rmtoll SMCR         SMS           LL_TIM_SetClockSource\n
   *         SMCR         ECE           LL_TIM_SetClockSource
   * @param  TIMx Timer instance
   * @param  ClockSource This parameter can be one of the following values:
   *         @arg @ref LL_TIM_CLOCKSOURCE_INTERNAL
-  *         @arg @ref LL_TIM_CLOCKSOURCE_EXT_MODE1
-  *         @arg @ref LL_TIM_CLOCKSOURCE_EXT_MODE2
+  *         @arg @ref LL_TIM_CLOCKSOURCE_EXT_MODE_TEMP_1
+  *         @arg @ref LL_TIM_CLOCKSOURCE_EXT_MODE_TEMP_2
   * @retval None
   */
 __STATIC_INLINE void LL_TIM_SetClockSource(TIM_TypeDef *TIMx, uint32_t ClockSource)
