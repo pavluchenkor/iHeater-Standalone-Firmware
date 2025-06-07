@@ -4,8 +4,8 @@
 
 #include <stdint.h>
 
-#define PID_SETTLE_DELTA 0.5f      // насколько близко к цели считается "стабильно"
-#define PID_SETTLE_SLOPE 0.1f      // насколько мала производная считается "стабильно"
+#define PID_SETTLE_DELTA 0.5f      //* насколько близко к цели считается "стабильно"
+#define PID_SETTLE_SLOPE 0.1f      //* насколько мала производная считается "стабильно"
 
 typedef struct {
     float Kp, Ki, Kd;

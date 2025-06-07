@@ -1,3 +1,9 @@
+/*****************************************************************
+************ DO NOT TOUCH UNLESS YOU KNOW WHAT YOU DO ************
+********* Any changes here may break core functionality.**********
+***************** Proceed only if you are 100% sure.**************
+*****************************************************************/
+
 enum Mode {
     MODE_0, MODE_1, MODE_2, MODE_3, MODE_4, MODE_5, MODE_6, MODE_7
 };
@@ -41,15 +47,16 @@ enum Mode {
 #define MAX_AIR_TEMP 90             // Set according to enclosure material
 #define PID_UPDATE_INTERVAL_MS 100  // PID update interval in milliseconds
 
-/**************************************
-************ USER SETTINGS ************
-***************************************/
+/**************************************************
+***************************************************
+****************** USER SETTINGS ******************
+***************************************************
+***************************************************/
 
 #define BOARD_REV_1_0   0
 #define BOARD_REV_1_1   1
-
-// >>> Specify the desired version:
-#define BOARD_REVISION  BOARD_REV_1_1
+//! >>> Specify the hardware version: <<<
+#define BOARD_REVISION  BOARD_REV_1_0
 
 #define HEATER_RESPONSE_TIMEOUT_MS (1000 * 60 * 3)      // Time to wait for heater response
 #define HEATER_MIN_TEMP_DELTA     0.1f                  // Minimum required temperature increase
@@ -84,7 +91,7 @@ enum Mode {
 #define THERMISTOR_TYPE_4 4  // SliceEngineering 450
 #define THERMISTOR_TYPE_5 5  // TDK NTCG104LH104JT1
 
-//!! Select thermistor type here
+//! Select thermistor type here
 #define SELECTED_THERMISTOR_TYPE THERMISTOR_TYPE_3
 
 // Actual resistance of the pull-up resistors

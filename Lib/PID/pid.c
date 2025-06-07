@@ -62,7 +62,7 @@ float PID_Compute(PID_Controller *pid, float temp, float target, float now)
     float error = target - temp;
     float integral = pid->integral + error * dt;
 
-    // clamp integral
+    //* clamp integral
     if (integral > pid->integral_limit) integral = pid->integral_limit;
     // if (integral < 0.0f) integral = 0.0f;
 
