@@ -19,7 +19,7 @@ void thermistor_init(Thermistor *therm, float pullup, float inline_resistor) {
     therm->c1 = therm->c2 = therm->c3 = 0.0f;
 }
 
-// Установка коэффициентов Штейнхарта–Харта
+// Установка коэффициентов Штейнхарта-Харта
 void thermistor_set_coefficients(Thermistor *therm,
                                  float t1, float r1,
                                  float t2, float r2,

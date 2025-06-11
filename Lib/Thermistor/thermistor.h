@@ -11,13 +11,13 @@
 typedef struct {
     float pullup;          // Сопротивление подтягивающего резистора
     float inline_resistor; // Последовательный резистор, если есть
-    float c1, c2, c3;      // Коэффициенты Штейнхарта–Харта
+    float c1, c2, c3;      // Коэффициенты Штейнхарта-Харта
 } Thermistor;
 
 // Инициализация термистора
 void thermistor_init(Thermistor *therm, float pullup, float inline_resistor);
 
-// Установка коэффициентов Штейнхарта–Харта
+// Установка коэффициентов Штейнхарта-Харта
 void thermistor_set_coefficients(Thermistor *therm,
                                  float t1, float r1,
                                  float t2, float r2,

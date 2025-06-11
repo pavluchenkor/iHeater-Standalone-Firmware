@@ -33,8 +33,8 @@ This file contains all configurable parameters:
 
 | Parameter                                 | Description                                                                                   |
 | ----------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `SELECTED_THERMISTOR_TYPE`                | Select thermistor type (0–5, see below)                                                       |
-| `MODE_TEMP_0`–`MODE_TEMP_7`                           | Setpoint temperatures for each mode. Can be any float value, e.g. `MODE_TEMP_4 67.5`                |
+| `SELECTED_THERMISTOR_TYPE`                | Select thermistor type (0-5, see below)                                                       |
+| `MODE_TEMP_0`-`MODE_TEMP_7`                           | Setpoint temperatures for each mode. Can be any float value, e.g. `MODE_TEMP_4 67.5`                |
 | `MAX_TEMP`, `MIN_TEMP`                    | Allowed temperature range for the heater                                                      |
 | `MAX_AIR_TEMP`, `MIN_AIR_TEMP`            | Allowed temperature range for air                                                             |
 | `HEATER_MIN_PWM`                          | Minimum PWM required to start heater response monitoring                                      |
@@ -107,11 +107,11 @@ This firmware is pre-configured with the temperature modes from MODE_TEMP_0 to M
 
 ## How to Use
 
-- **Short press** MODE button — cycle through temperature modes (0–7)
-- **Long press (2+ seconds)** — reset to MODE_TEMP_0 (OFF)
+- **Short press** MODE button - cycle through temperature modes (0-7)
+- **Long press (2+ seconds)** - reset to MODE_TEMP_0 (OFF)
 - **LEDs** indicate current mode in binary (see table above)
-- **Blinking LEDs** — heating in progress
-- **Solid LEDs** — target temperature reached
+- **Blinking LEDs** - heating in progress
+- **Solid LEDs** - target temperature reached
 
 ---
 

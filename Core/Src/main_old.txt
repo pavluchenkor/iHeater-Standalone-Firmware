@@ -321,12 +321,12 @@ int main(void)
 
         if (air_temp > air_target + 0.1f)
         {
-          // Сильно перегрет — сбрасываем
+          // Сильно перегрет - сбрасываем
           heater_setpoint = 0.0f;
         }
         else
         {
-          // Основной PID — всегда, пока не перегрет
+          // Основной PID - всегда, пока не перегрет
           heater_setpoint = PID_Compute(&pid_air, air_temp, smart_setpoint, now);
 
           float min_setpoint = air_target + 10.0f;
@@ -383,18 +383,18 @@ int main(void)
                 heater_start_temp = heater_temp;
                 heater_warming_up = true;
             } else {
-                // Уже греем — проверим прогресс
+                // Уже греем - проверим прогресс
                 if (heater_temp > heater_start_temp + HEATER_MIN_TEMP_DELTA) {
-                    // Температура начала расти — всё норм
+                    // Температура начала расти - всё норм
                     heater_warming_up = false;
                 } else if (HAL_GetTick() - heater_start_time > HEATER_RESPONSE_TIMEOUT_MS) {
-                    // Время вышло, а температура не изменилась — ошибка
+                    // Время вышло, а температура не изменилась - ошибка
                     heater_fault = true;
                     heater_warming_up = false;
                 }
             }
         } else {
-            // PWM упал — сбрасываем ожидание
+            // PWM упал - сбрасываем ожидание
             heater_warming_up = false;
         }
     }
@@ -407,7 +407,7 @@ int main(void)
 
     if (!air_fault && mode != 0)
     {
-      // Если температура уже достигнута — не отслеживаем
+      // Если температура уже достигнута - не отслеживаем
       if (air_temp >= air_target - 5.0f)
       {
         air_warming_up = false;
@@ -421,15 +421,15 @@ int main(void)
       }
       else
       {
-        // Уже отслеживаем — проверим прогресс
+        // Уже отслеживаем - проверим прогресс
         if (air_temp > air_start_temp + AIR_MIN_TEMP_DELTA)
         {
-          // Нагрев пошёл — всё хорошо
+          // Нагрев пошёл - всё хорошо
           air_warming_up = false;
         }
         else if (HAL_GetTick() - air_start_time > AIR_RESPONSE_TIMEOUT_MS)
         {
-          // Время вышло — ошибка
+          // Время вышло - ошибка
           air_fault = true;
           air_warming_up = false;
         }
@@ -461,7 +461,7 @@ int main(void)
             long_press_handled = false;
         } else {
             if (!long_press_handled && (now - button_press_time > 2000)) {
-                mode = 0; // Долгое удержание — сброс
+                mode = 0; // Долгое удержание - сброс
                 heater_setpoint = 0.0f;
                 long_press_handled = true;
                 __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, 0);

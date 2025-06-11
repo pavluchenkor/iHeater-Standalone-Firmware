@@ -7,7 +7,7 @@ Changelog
  - Air temperature fluctuations +-0.5C
 
 
-**v0.1.0 — Initial Public Draft**
+**v0.1.0 - Initial Public Draft**
 
 - Basic standalone firmware structure for iHeater
 
