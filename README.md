@@ -71,47 +71,108 @@ Each mode sets a target temperature and is displayed via binary LEDs:
 | MODE_TEMP_7  | 85.0°C      | 1    | 1    | 1    |
 
 ---
+### Automatic enabling and disabling r1.1
+
+Macros
+
+```
+#define TRIGGER_ON_TEMP  45.0f
+#define TRIGGER_OFF_TEMP 80.0f
+#define TRIGGER_MODE MODE_2
+```
+
+These parameters define the activation and deactivation temperatures for the heater, as well as the mode to be enabled upon activation.
+
+Assuming the trigger thermistor is located near the heated bed.
+With the current settings, the chamber heater will turn on when the bed temperature reaches 45°C and will turn off when the bed temperature drops below 80°C. These parameters are suitable for most filaments that require an actively heated chamber and do not cause logical conflicts during operation.
+
+It is also possible to select the mode that will be activated when the trigger is engaged. For example, TRIGGER_MODE MODE_2 is currently selected, which means that MODE_TEMP_2 will be activated, setting the chamber temperature to 60.0°C.
+
+
+---
 
 ## How to Flash the Firmware
 
+### Download
+
+[Скачайте прошивку со страницы релизов](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases)
+
+
 ### Using Precompiled Binary
 
-If you haven't made code changes, a ready-to-use `.bin` file is located in the `Firmware` folder, for example:
+[Download the firmware from the releases page](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases)
 
-```
-Firmware/iHeater_v1.2.3.bin
-```
 
 This firmware is pre-configured with the temperature modes from MODE_TEMP_0 to MODE_TEMP_7 (as described above) and designed to work with a Generic 3950 thermistor (type 3 in `config.h`).
 
-### Using DFU (USB)
+### Using DFU Mode (USB)
 
-1. Set the BOOT0 jumper to enable DFU mode
-2. Connect USB; the device should appear as a DFU device
-3. Flash the firmware:
-   ```bash
-   dfu-util -a 0 -s 0x08000000 -D Firmware/iHeater_vX.Y.Z.bin
-   ```
-4. Remove the jumper and power cycle the device
+=== "r1"
 
-### Using STM32CubeProgrammer
+    1. Set the BOOT0 jumper
+    2. Connect USB, the device will be recognized as DFU 3.1 Upload the firmware using STM32CubeProgrammer:
 
-1. Connect via ST-Link or USB-UART depending on your board
-2. Open STM32CubeProgrammer
-3. Connect to the device
-4. Browse and select your `.bin` file (e.g. `Firmware/iHeater_v1.2.3.bin`)
-5. Set download address to: `0x08000000`
-6. Click "Start Programming"
+    3.1.1 Specify the path to the `.bin` firmware file (e.g.: `Firmware/iHeater_v1.2.3.bin`) 3.1.2 Set the download address: `0x08000000`
+
+    3.1.3 Click "Start Programming"
+
+    or
+
+    3.2 Upload the firmware via command line:
+
+    ```bash
+    dfu-util -a 0 -s 0x08000000 -D Firmware/iHeater_vX.Y.Z.bin
+    ```
+
+    4. Remove the jumper and power cycle the device
+
+=== "r1.1"
+
+    1. Press and hold the BOOT button
+    2. Connect USB, the device will be recognized as DFU 
+    3. Upload the firmware using STM32CubeProgrammer:
+    
+        3.1.1 Specify the path to the `.bin` firmware file (e.g.: `Firmware/iHeater_v1.2.3.bin`)
+
+        3.1.2 Set the download address: `0x08000000`
+
+        3.1.3 Click "Start Programming"
+
+        or
+
+        3.2 Upload the firmware via command line:
+
+        ```bash
+        dfu-util -a 0 -s 0x08000000 -D Firmware/iHeater_vX.Y.Z.bin
+        ```
+
+    4. Power cycle the device
+
 
 ---
 
 ## How to Use
 
-- **Short press** MODE button - cycle through temperature modes (0-7)
-- **Long press (2+ seconds)** - reset to MODE_TEMP_0 (OFF)
-- **LEDs** indicate current mode in binary (see table above)
-- **Blinking LEDs** - heating in progress
-- **Solid LEDs** - target temperature reached
+=== "r1"
+
+    * **Short press** of the MODE button - switches modes (0-7)
+    * **Long press (2+ sec)** - resets the mode to 0 (OFF)
+    * **LED indicators** display the current mode according to the table above
+    * **Flashing LEDs** - mode is active but target temperature not yet reached
+    * **Solid light** - target temperature reached
+
+=== "r1.1"
+
+    !!! note "Revision Differences"
+
+        revision r1.1 features a trigger port for automatic chamber heating control. When a thermistor is connected to the trigger port, heating will turn on and off according to the temperatures specified in config.h, by default 45 and 80 for heating activation and deactivation.
+
+
+    * **Short press** of the MODE button - switches modes (0-7)
+    * **Long press (2+ sec)** - resets the mode to 0 (OFF)
+    * **LED indicators** display the current mode according to the table above
+    * **Flashing LEDs** - mode is active but target temperature not yet reached
+    * **Solid light** - target temperature reached
 
 ---
 
@@ -133,6 +194,19 @@ The device auto-resets and shows an error code using LED indicators.
 ### Resetting an Error
 
 Hold the MODE button during startup until the LEDs change. The stored error will be cleared from flash memory, and the device will resume normal operation.
+
+---
+
+## Fine Tuning
+
+If there is confirmation that the thermocouple readings deviate from the actual temperature, the fine tuning function can be used. For this purpose, it is necessary to measure the resistance of the corresponding resistors and record these values instead of the default ones.
+
+
+```C++ title="Actual resistance of the pull-up resistors"
+#define PULLUP_TH0 4700.0f
+#define PULLUP_TH1 4700.0f
+#define PULLUP_TH2 4700.0f
+```
 
 ---
 
