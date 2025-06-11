@@ -74,13 +74,15 @@ Each mode sets a target temperature and is displayed via binary LEDs:
 
 ## How to Flash the Firmware
 
+### Download
+
+[Скачайте прошивку со страницы релизов](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases)
+
+
 ### Using Precompiled Binary
 
-If you haven't made code changes, a ready-to-use `.bin` file is located in the `Firmware` folder, for example:
+[Download the firmware from the releases page](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases)
 
-```
-Firmware/iHeater_v1.2.3.bin
-```
 
 This firmware is pre-configured with the temperature modes from MODE_TEMP_0 to MODE_TEMP_7 (as described above) and designed to work with a Generic 3950 thermistor (type 3 in `config.h`).
 
