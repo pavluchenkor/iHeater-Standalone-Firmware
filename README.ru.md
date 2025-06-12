@@ -22,7 +22,7 @@ iHeater - это компактное и доступное решение дл�
 
 ## Назначение
 
-Устройство обеспечивает нагрев и поддержание стабильнуой температуры внутри камеры 3D-принтера, что критично для печати ABS, ASA и других температурозависимых пластиков с высокой усадкой и низкой адгезией слоев.
+Устройство обеспечивает нагрев и поддержание стабильной температуры внутри камеры 3D-принтера, что критично для печати ABS, ASA и других температурозависимых пластиков с высокой усадкой и низкой адгезией слоев.
 
 ---
 
@@ -61,16 +61,18 @@ iHeater - это компактное и доступное решение дл�
 
 Режим задаётся значением температуры и отображается в двоичном виде тремя светодиодами:
 
-| Режим | Температура | LED3 | LED2 | LED1 |
-| ----- | ----------- | ---- | ---- | ---- |
-| MODE_TEMP_0 | 0.0°C       | 0    | 0    | 0    |
-| MODE_TEMP_1 | 55.0°C      | 0    | 0    | 1    |
-| MODE_TEMP_2 | 60.0°C      | 0    | 1    | 0    |
-| MODE_TEMP_3 | 65.0°C      | 0    | 1    | 1    |
-| MODE_TEMP_4 | 70.0°C      | 1    | 0    | 0    |
-| MODE_TEMP_5 | 75.0°C      | 1    | 0    | 1    |
-| MODE_TEMP_6 | 80.0°C      | 1    | 1    | 0    |
-| MODE_TEMP_7 | 85.0°C      | 1    | 1    | 1    |
+При выходе на режим светодиоды мигают, по выходу на режим - светят постоянно
+
+| Mode   | Temperature | LED3 | LED2 | LED1 |
+|--------|-------------|------|------|------|
+| MODE_TEMP_0  | 0.0°C       |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |
+| MODE_TEMP_1  | 55.0°C      |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |
+| MODE_TEMP_2  | 60.0°C      |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |
+| MODE_TEMP_3  | 65.0°C      |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |
+| MODE_TEMP_4  | 70.0°C      |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |
+| MODE_TEMP_5  | 75.0°C      |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |
+| MODE_TEMP_6  | 80.0°C      |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |
+| MODE_TEMP_7  | 85.0°C      |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |
 
 ---
 ### Автоматическое включение и выключение r1.1
@@ -168,18 +170,21 @@ iHeater - это компактное и доступное решение дл�
 
 ## Как быть в случае ошибки
 
-Устройство автоматически перезапускается и показывает код ошибки светодиодами.
+Устройство автоматически перезапускается и показывает код ошибки светодиодами, кулер при этом будет включен.
 
-| Код  | Описание                              | LED1 | LED2  | LED3      |
-| ---- | ------------------------------------- | ---- | ----- | --------- |
-| 0x01 | Воздух не достиг температуры за время | ON   | OFF   | OFF       |
-| 0x02 | Нагреватель не реагирует на мощность  | OFF  | ON    | OFF       |
-| 0x03 | Ручное выключение (не используется)   | ON   | ON    | OFF       |
-| 0x04 | Обрыв термистора воздуха              | OFF  | OFF   | ON        |
-| 0x05 | Обрыв термистора нагревателя          | ON   | OFF   | ON        |
-| 0x06 | Перегрев нагревателя                  | OFF  | ON    | ON        |
-| 0x07 | Перегрев воздуха                      | ON   | ON    | ON        |
-| 0xFF | Неизвестная ошибка                    | ВСЕ  | ГОРЯТ | ПОСТОЯННО |
+
+| Code  | Description                               | LED3 | LED2 | LED1  |
+|-------|-------------------------------------------|------|------|-------|
+| 0x01  | Air failed to reach target in time        |![LED OFF](img/ball_gifs/black_ball.gif)  |![LED OFF](img/ball_gifs/black_ball.gif) |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |
+| 0x02  | Heater not responding                     |![LED OFF](img/ball_gifs/black_ball.gif) |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](img/ball_gifs/black_ball.gif)  |
+| 0x03  | Manual shutdown (unused)                  |![LED OFF](img/ball_gifs/black_ball.gif)  |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |
+| 0x04  | Air thermistor disconnected                |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif) |![LED OFF](img/ball_gifs/black_ball.gif) |![LED OFF](img/ball_gifs/black_ball.gif)   |
+| 0x05  | Heater thermistor disconnected             |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](img/ball_gifs/black_ball.gif) |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)   |
+| 0x06  | Heater overtemperature                     |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif) |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](img/ball_gifs/black_ball.gif)   |
+| 0x07  | Air overtemperature                        |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)   |
+| 0xFF  | Unknown error                              |![LED ON](img/ball_gifs/red_ball.gif)  | ![LED ON](img/ball_gifs/red_ball.gif)|![LED ON](img/ball_gifs/red_ball.gif)  |
+
+
 
 ### Сброс ошибки
 
