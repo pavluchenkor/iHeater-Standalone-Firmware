@@ -59,7 +59,7 @@ TIM_HandleTypeDef htim2;
   #error "Unknown board revision"
 #endif
 
-#define ADC_SAMPLES 10
+#define ADC_SAMPLES 30
 
 uint16_t adc_dma_buffer[ADC_CHANNEL_COUNT * ADC_SAMPLES];
 float adc_sum[ADC_CHANNEL_COUNT] = {0};

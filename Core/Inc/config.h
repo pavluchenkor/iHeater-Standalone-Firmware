@@ -95,13 +95,13 @@ enum Mode {
 #define SELECTED_THERMISTOR_TYPE THERMISTOR_TYPE_3
 
 // Actual resistance of the pull-up resistors
-#define PULLUP_TH0 4460.0f
-#define PULLUP_TH1 4450.0f
-#define PULLUP_TH2 4450.0f
+#define PULLUP_TH0 4700.0f
+#define PULLUP_TH1 4700.0f
+#define PULLUP_TH2 4700.0f
 
 // Resistor wire resistance
 #define INLINE_RESISTOR_TH0 0.0f
 #define INLINE_RESISTOR_TH1 0.0f
 #define INLINE_RESISTOR_TH2 0.0f
 
-#define ALPHA 0.05f
+#define ALPHA 0.005f

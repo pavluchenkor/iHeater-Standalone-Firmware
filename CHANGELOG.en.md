@@ -1,4 +1,11 @@
 Changelog
+**v0.2.1**
+- Thermistor Steinhart-Hart coefficients have been adapted from Klipper's configuration
+
+**v0.2.0**
+ - Selectable automatic activation temperature
+ - Selectable automatic deactivation temperature
+ - Selectable heating mode for automatic activation
 
 **v0.1.3**
  - Correction of PID controller
