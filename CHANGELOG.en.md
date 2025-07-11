@@ -1,4 +1,8 @@
 Changelog
+**v0.2.2**
+ - Fixed temperature data source
+ - comments translated to English
+
 **v0.2.1**
 - Thermistor Steinhart-Hart coefficients have been adapted from Klipper's configuration
 

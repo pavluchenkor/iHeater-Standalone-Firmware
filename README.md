@@ -9,7 +9,7 @@ iHeater is a compact and affordable solution for 3D printers without an active h
 
 It can operate standalone with its own firmware or be integrated with Klipper over USB.
 
-![iHeater](imgweb/iHeater.png)
+![iHeater](imgweb/iHeater_200.png)
 
 ---
 
