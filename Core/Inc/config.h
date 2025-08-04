@@ -56,14 +56,14 @@ enum Mode {
 #define BOARD_REV_1_0   0
 #define BOARD_REV_1_1   1
 //! >>> Specify the hardware version: <<<
-#define BOARD_REVISION  BOARD_REV_1_1
+#define BOARD_REVISION  BOARD_REV_1_1                   // BOARD_REV_1_1 or BOARD_REV_1_0
 
-#define HEATER_RESPONSE_TIMEOUT_MS (1000 * 60 * 3)      // Time to wait for heater response
 #define HEATER_MIN_TEMP_DELTA     0.1f                  // Minimum required temperature increase
+#define HEATER_RESPONSE_TIMEOUT_MS (1000 * 60 * 30)     // Time to wait for heater response
 #define HEATER_MIN_PWM            80.0f                 // Minimum PWM value for response check
 
-#define AIR_MIN_TEMP_DELTA     2.0f   // Minimum required air temperature increase
-#define AIR_RESPONSE_TIMEOUT_MS (1000 * 60 * 10) // 10min
+#define AIR_MIN_TEMP_DELTA     1.0f                     // Minimum required air temperature increase
+#define AIR_RESPONSE_TIMEOUT_MS (1000 * 60 * 30)        // Time to wait for air response
 
 #define FAN_ON_TEMP     55.0f
 #define FAN_OFF_TEMP    35.0f
