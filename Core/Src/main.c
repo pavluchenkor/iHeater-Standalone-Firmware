@@ -127,6 +127,7 @@ float air_start_temp = 0.0f;
 float heater_setpoint = 0.0f;
 float air_target = 0.0f;
 float pwm = 0.0f;
+float heater_target = 0.0f;
 
 uint32_t pulse = 0;
 uint32_t period =  0;
@@ -148,6 +149,9 @@ void ClearErrorCode(void);
 float GetTemperatureByMode(uint8_t mode);
 void Update_LEDs(uint8_t mode, float current_temp, uint32_t speed);
 void reset_LEDs(uint8_t repeats);
+#if DEVICE_PROFILE == DEVICE_PROFILE_DRYER
+static float ComputeHeaterTarget(float air_target);
+#endif
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -323,6 +327,9 @@ int main(void)
         // float dt = PID_UPDATE_INTERVAL_MS / 1000.0f;
 
         air_target = GetTemperatureByMode(mode);
+#if DEVICE_PROFILE == DEVICE_PROFILE_DRYER
+        heater_target = ComputeHeaterTarget(air_target);
+#endif
 
         //*External PID: air -> heater temperature
         float air_error = air_target - air_temp;
@@ -357,12 +364,23 @@ int main(void)
           //* Main PID - always, as long as it is not overheated
           heater_setpoint = PID_Compute(&pid_air, air_temp, smart_setpoint, now);
 
+#if DEVICE_PROFILE == DEVICE_PROFILE_DRYER
+          float lower_bound = air_target;
+          if (air_temp < air_target - 5.0f) {
+            lower_bound = air_target + HEATER_MIN_DELTA;
+          }
+          if (lower_bound > heater_target) {
+            lower_bound = heater_target;
+          }
+          heater_setpoint = clamp(heater_setpoint, lower_bound, heater_target);
+#else
           float min_setpoint = air_target + 10.0f;
           if (air_temp < air_target - 5.0f && heater_setpoint < min_setpoint)
             heater_setpoint = min_setpoint;
 
           heater_setpoint += clamp(heater_setpoint, 30.0f, MAX_TEMP);
           heater_setpoint /=2;
+#endif
         }
 
       
@@ -864,6 +882,20 @@ float GetTemperatureByMode(uint8_t mode) {
         return 0.0f; //* Bounds check
     }
 }
+
+#if DEVICE_PROFILE == DEVICE_PROFILE_DRYER
+static float ComputeHeaterTarget(float air_target)
+{
+    // float delta = air_target * HEATER_DELTA_PERCENT;
+    // if (delta < HEATER_MIN_DELTA)
+    // {
+    //     delta = HEATER_MIN_DELTA;
+    // }
+
+    // return clamp(air_target + delta, air_target + HEATER_MIN_DELTA, MAX_TEMP);
+     return air_target + air_target * HEATER_DELTA_PERCENT;
+}
+#endif
 
 
 void SetHeaterPWM(float pwm_percent)

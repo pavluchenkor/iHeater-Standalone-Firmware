@@ -53,6 +53,16 @@ enum Mode {
 ***************************************************
 ***************************************************/
 
+// Device profiles
+#define DEVICE_PROFILE_HEATER 0
+#define DEVICE_PROFILE_DRYER  1
+
+#define DEVICE_PROFILE DEVICE_PROFILE_DRYER             // DEVICE_PROFILE_HEATER or DEVICE_PROFILE_DRYER
+
+#ifndef DEVICE_PROFILE
+#define DEVICE_PROFILE DEVICE_PROFILE_HEATER
+#endif
+
 #define BOARD_REV_1_0   0
 #define BOARD_REV_1_1   1
 //! >>> Specify the hardware version: <<<
@@ -72,6 +82,16 @@ enum Mode {
 #define TRIGGER_ON_TEMP  45.0f
 #define TRIGGER_OFF_TEMP 80.0f
 #define TRIGGER_MODE MODE_2
+
+#if DEVICE_PROFILE == DEVICE_PROFILE_DRYER
+#define HEATER_DELTA_ABS       35.0f
+#define HEATER_DELTA_PERCENT   0.30f
+#define HEATER_MIN_DELTA        5.0f
+// #else
+// #define HEATER_DELTA_ABS        0.0f
+// #define HEATER_DELTA_PERCENT    0.0f
+// #define HEATER_MIN_DELTA        0.0f
+#endif
 
 // Temperature setpoints per mode
 #define MODE_TEMP_0 0.0f

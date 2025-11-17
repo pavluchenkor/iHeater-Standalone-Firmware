@@ -8,6 +8,7 @@ revision_file = "Core/Inc/config.h"
 
 # Значения по умолчанию
 major = minor = patch = 0
+revision = "unknown"
 
 # Ищем нужные define'ы
 try:
@@ -42,7 +43,8 @@ except FileNotFoundError:
 # Формируем имя файла
 version_str = f"{major}.{minor}.{patch}"
 firmware_dir = "Firmware"
-output_bin = os.path.join(firmware_dir, f"iHeater_v{version_str}_rev{revision}.bin")
+profile_name = env.get("PIOENV", "unknown")
+output_bin = os.path.join(firmware_dir, f"{profile_name}_v{version_str}_rev{revision}.bin")
 
 
 
