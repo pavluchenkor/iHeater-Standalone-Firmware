@@ -1,4 +1,13 @@
 Changelog
+**v0.3.0**
+- Trigger temperature calibration mode via button
+- Long press in MODE_0 enters calibration
+- Step 1: set TRIGGER_ON_TEMP (1 LED blinks 10Hz)
+- Step 2: set TRIGGER_OFF_TEMP (2 LEDs blink 10Hz)
+- Success indication: all 3 LEDs blink 3 times
+- Short press cancels calibration and rolls back changes
+- Settings saved to NVS (flash memory)
+
 **v0.2.2**
  - Fixed temperature data source
  - comments translated to English
