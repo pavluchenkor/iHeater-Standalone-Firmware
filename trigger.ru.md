@@ -97,13 +97,12 @@ if (mode == MODE_0 && trigger_temp <= TRIGGER_ON_TEMP)
 #define TRIGGER_OFF_TEMP 80.0f  // Выключить iHeater
 ```
 
-**Важно**: TRIGGER_ON_TEMP < TRIGGER_OFF_TEMP
 
 ---
 
 ## Безопасность
 
-- В режиме калибровки  iHeater **выключена** (PWM = 0)
+- В режиме калибровки  iHeater **выключен** (PWM = 0)
 - При отмене калибровки значения **откатываются** из NVS
 - Watchdog (IWDG) сбрасывается во время индикации
 

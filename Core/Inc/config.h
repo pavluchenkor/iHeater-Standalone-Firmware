@@ -67,7 +67,7 @@ enum Mode
 #define DEVICE_PROFILE_HEATER 0
 #define DEVICE_PROFILE_DRYER 1
 
-#define DEVICE_PROFILE DEVICE_PROFILE_DRYER // DEVICE_PROFILE_HEATER or DEVICE_PROFILE_DRYER
+#define DEVICE_PROFILE DEVICE_PROFILE_HEATER // DEVICE_PROFILE_HEATER or DEVICE_PROFILE_DRYER
 
 #ifndef DEVICE_PROFILE
 #define DEVICE_PROFILE DEVICE_PROFILE_HEATER
@@ -76,7 +76,9 @@ enum Mode
 #define BOARD_REV_1_0 0
 #define BOARD_REV_1_1 1
 //! >>> Specify the hardware version: <<<
-#define BOARD_REVISION BOARD_REV_1_1 // BOARD_REV_1_1 or BOARD_REV_1_0
+#ifndef BOARD_REVISION
+#define BOARD_REVISION BOARD_REV_1_1 // BOARD_REV_1_1 or BOARD_REV_1_0 (default if not set via build_flags)
+#endif
 
 #define HEATER_MIN_TEMP_DELTA 0.1f                  // Minimum required temperature increase
 #define HEATER_RESPONSE_TIMEOUT_MS (1000 * 60 * 30) // Time to wait for heater response
@@ -91,7 +93,7 @@ enum Mode
 
 #define TRIGGER_ON_TEMP 75.0f
 #define TRIGGER_OFF_TEMP 80.0f
-#define TRIGGER_MODE MODE_2
+#define TRIGGER_MODE MODE_3
 
 #if DEVICE_PROFILE == DEVICE_PROFILE_DRYER
 #define HEATER_DELTA_ABS 35.0f

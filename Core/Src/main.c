@@ -37,7 +37,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-#define NVS_FLASH_ADDRESS 0x0800F400
+#define NVS_FLASH_ADDRESS 0x08007800
 #define NVS_MAGIC 0xDEADBEEF
 
 typedef struct
@@ -195,7 +195,6 @@ int main(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
@@ -205,6 +204,7 @@ int main(void)
 
   /* USER CODE BEGIN SysInit */
   NVS_Load();
+
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -567,12 +567,13 @@ int main(void)
       }
       break;
     case true:
-      if (trigger_temp <= nvs_data.trigger_off_temp && mode != MODE_0)
+      if (trigger_temp < nvs_data.trigger_off_temp && mode != MODE_0)
       {
         mode = MODE_0;
         trigger_heater_enabled = false;
       }
-      if (mode == MODE_0 && trigger_temp <= nvs_data.trigger_on_temp)
+
+      if (mode == MODE_0 && trigger_temp < nvs_data.trigger_on_temp - 2)
       {
         trigger_state_reached = false;
       }
@@ -657,7 +658,7 @@ int main(void)
           //* Short press
           if (mode == CALIBRATION_STEP_1 || mode == CALIBRATION_STEP_2)
           {
-            NVS_Load(); //* Rollback changes
+            NVS_Load();    //* Rollback changes
             mode = MODE_0; //* Cancel calibration
           }
           else

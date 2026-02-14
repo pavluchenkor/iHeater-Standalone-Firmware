@@ -35,6 +35,3 @@ Release/
 
 # Windows
 Thumbs.db
-
-.gitignore
-AGENTS.md
