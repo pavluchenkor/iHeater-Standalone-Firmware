@@ -285,6 +285,12 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    /* TEST */
+    // HAL_GPIO_WritePin(FAN_GPIO_Port, FAN_Pin, GPIO_PIN_SET);
+    // period = __HAL_TIM_GET_AUTORELOAD(&htim2);
+    // pulse = (uint32_t)((100 / 100.0f) * period);
+    // __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, pulse);
+    /* TEST END*/
 
     if (mode == MODE_0)
     {
