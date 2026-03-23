@@ -4,13 +4,12 @@ import os
 
 # Путь к version.h
 version_file = "Core/Inc/version.h"
-revision_file = "Core/Inc/config.h"
 
 # Значения по умолчанию
 major = minor = patch = 0
 revision = "unknown"
 
-# Ищем нужные define'ы
+# Ищем нужные define'ы в version.h
 try:
     with open(version_file, "r") as f:
         for line in f:
@@ -23,22 +22,14 @@ try:
 except FileNotFoundError:
     print(f"WARNING: {version_file} not found, using version 0.0.0")
 
-
-# version_str = f"{major}.{minor}.{patch}"
-# firmware_dir = "Firmware"
-# output_bin = os.path.join(firmware_dir, f"iHeater_v{version_str}.bin")
-
-# Читаем ревизию платы
-try:
-    with open(revision_file, "r") as f:
-        for line in f:
-            # Находим строку с BOARD_REVISION
-            m = re.search(r"#define\s+BOARD_REVISION\s+BOARD_REV_(\d+)_(\d+)", line)
-            if m:
-                revision = f"{m.group(1)}.{m.group(2)}"
-                break
-except FileNotFoundError:
-    print(f"WARNING: {revision_file} not found, BOARD_REVISION unknown")
+# Читаем BOARD_REVISION из build_flags
+build_flags = env.get("BUILD_FLAGS", [])
+for flag in build_flags:
+    # Ищем -DBOARD_REVISION=BOARD_REV_X_Y
+    m = re.search(r"-DBOARD_REVISION=BOARD_REV_(\d+)_(\d+)", flag)
+    if m:
+        revision = f"{m.group(1)}.{m.group(2)}"
+        break
 
 # Формируем имя файла
 version_str = f"{major}.{minor}.{patch}"
