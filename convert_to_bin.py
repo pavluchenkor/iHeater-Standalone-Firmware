@@ -7,7 +7,6 @@ version_file = "Core/Inc/version.h"
 
 # Значения по умолчанию
 major = minor = patch = 0
-revision = "unknown"
 
 # Ищем нужные define'ы в version.h
 try:
@@ -22,20 +21,11 @@ try:
 except FileNotFoundError:
     print(f"WARNING: {version_file} not found, using version 0.0.0")
 
-# Читаем BOARD_REVISION из build_flags
-build_flags = env.get("BUILD_FLAGS", [])
-for flag in build_flags:
-    # Ищем -DBOARD_REVISION=BOARD_REV_X_Y
-    m = re.search(r"-DBOARD_REVISION=BOARD_REV_(\d+)_(\d+)", flag)
-    if m:
-        revision = f"{m.group(1)}.{m.group(2)}"
-        break
-
 # Формируем имя файла
 version_str = f"{major}.{minor}.{patch}"
 firmware_dir = "Firmware"
 profile_name = env.get("PIOENV", "unknown")
-output_bin = os.path.join(firmware_dir, f"{profile_name}_v{version_str}_rev{revision}.bin")
+output_bin = os.path.join(firmware_dir, f"{profile_name}_v{version_str}.bin")
 
 
 
