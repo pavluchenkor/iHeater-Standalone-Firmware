@@ -21,7 +21,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 /* USER CODE BEGIN Includes */
-
+#include "config.h"
 /* USER CODE END Includes */
 extern DMA_HandleTypeDef hdma_adc;
 
@@ -102,17 +102,19 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
     /**ADC GPIO Configuration
     PA0     ------> ADC_IN0
     PA3     ------> ADC_IN3
-    PB1     ------> ADC_IN9
+    PB1     ------> ADC_IN9            (analog builds only; repurposed as EXTI in pulse build)
     */
     GPIO_InitStruct.Pin = TH1_Pin|TH0_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+#if INPUT_MODE != INPUT_MODE_DIGITAL_PULSE
     GPIO_InitStruct.Pin = TH2_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(TH2_GPIO_Port, &GPIO_InitStruct);
+#endif
 
     /* ADC1 DMA Init */
     /* ADC Init */
@@ -158,11 +160,12 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
     /**ADC GPIO Configuration
     PA0     ------> ADC_IN0
     PA3     ------> ADC_IN3
-    PB1     ------> ADC_IN9
+    PB1     ------> ADC_IN9            (analog builds only; repurposed as EXTI in pulse build)
     */
     HAL_GPIO_DeInit(GPIOA, TH1_Pin|TH0_Pin);
-
+#if INPUT_MODE != INPUT_MODE_DIGITAL_PULSE
     HAL_GPIO_DeInit(TH2_GPIO_Port, TH2_Pin);
+#endif
 
     /* ADC1 DMA DeInit */
     HAL_DMA_DeInit(hadc->DMA_Handle);

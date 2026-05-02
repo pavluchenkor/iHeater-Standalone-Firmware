@@ -1,4 +1,17 @@
 Changelog
+
+**v0.5.0**
+- New build `iheater_rev1_1_pulse` for pairing with the ESP-based iHeater-link module
+- Chamber setpoint is received over a single GPIO line as a pulse train on the TH2 connector (PB1, EXTI); code equals air temperature in °C
+- Accepted command range: `0` = off, `10` = off (agreed with iHeater-link), `45..90` = heating setpoint in °C, other values ignored
+- Heater and air thermistors stay on their normal connectors (TH0/PA3 and TH1/PA0); trigger feature is disabled in the pulse build
+- New dedicated mode `MODE_PULSE` with its own LED pattern (chasing light LED1→LED2→LED3 at 500 ms step); in `MODE_0` LED1 stays solid as a link-alive heartbeat and LED3 flashes ~80 ms on every accepted frame
+- New fault `ERROR_LINK_LOST` (0x08): all three LEDs blink at 0.25 Hz when no pulse frames arrive within 1.5 s; device resets with heater off
+- 20-second boot grace window on the pulse build: link-lost is suppressed while waiting for the very first frame from iHeater-link (slow chasing light, 1000 ms step). After 20 s without a frame the fault fires as usual.
+- In the pulse build the MODE button no longer cycles modes or triggers calibration — it only clears a persisted error at startup
+- Standard protections (overheat, open thermistor, heater-no-response) remain active in the pulse build
+- Existing analog builds (`iheater_rev1_0`, `iheater_rev1_1`, `idryer_rev1_1`) are unchanged except for the version string
+
 **v0.3.0**
 - Trigger temperature calibration mode via button
 - Long press in MODE_0 enters calibration

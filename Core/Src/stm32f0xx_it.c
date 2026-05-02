@@ -22,6 +22,8 @@
 #include "stm32f0xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "config.h"
+#include "pulse_input.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -155,5 +157,21 @@ void DMA1_Channel1_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+#if INPUT_MODE == INPUT_MODE_DIGITAL_PULSE
+/**
+ * @brief EXTI lines 0..1 interrupt handler — routes PB1 falling edges to the pulse decoder.
+ */
+void EXTI0_1_IRQHandler(void)
+{
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
+}
 
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  if (GPIO_Pin == GPIO_PIN_1)
+  {
+    PulseInput_OnFallingEdge();
+  }
+}
+#endif
 /* USER CODE END 1 */

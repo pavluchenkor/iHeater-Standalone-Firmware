@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pio run *)",
+      "Bash(mdfind -name \"flows.json\")",
+      "Read(//Users/ruslanpavlucenko/Library/stm32cubemonitor/**)",
+      "Bash(python3 *)",
+      "Bash(jq *)"
+    ]
+  }
+}

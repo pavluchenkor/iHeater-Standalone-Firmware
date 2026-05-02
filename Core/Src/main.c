@@ -27,6 +27,7 @@
 #include "config.h"
 #include "pid.h"
 #include "ema_filter.h"
+#include "pulse_input.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -64,7 +65,11 @@ TIM_HandleTypeDef htim2;
 /* USER CODE BEGIN PV */
 NVS_Data nvs_data;
 
-#if BOARD_REVISION == BOARD_REV_1_0
+#if INPUT_MODE == INPUT_MODE_DIGITAL_PULSE
+// Pulse build: PB1 (ADC_IN9 / TH2) is repurposed as a digital EXTI input for the RMT line.
+// ADC still scans PA0 (TH1 → air_temp) and PA3 (TH0 → heater_temp) — same as BOARD_REV_1_0.
+#define ADC_CHANNEL_COUNT 2
+#elif BOARD_REVISION == BOARD_REV_1_0
 #define ADC_CHANNEL_COUNT 2
 #elif BOARD_REVISION == BOARD_REV_1_1
 #define ADC_CHANNEL_COUNT 3
@@ -99,6 +104,16 @@ const float inline_resistors[] = {
 };
 
 enum Mode mode = MODE_0;
+
+#if INPUT_MODE == INPUT_MODE_DIGITAL_PULSE
+// Air-temperature setpoint commanded by the RMT pulse frame (°C).
+// Overrides GetTemperatureByMode() in the PID update block.
+float pulse_air_target = 0.0f;
+// Total accepted frames. Useful as a live counter in CubeMonitor.
+volatile uint32_t pulse_frames_received = 0;
+// Tick of the last accepted frame. Drives the short LED3 flash in MODE_0.
+volatile uint32_t pulse_last_frame_tick = 0;
+#endif
 
 float adc_value0 = 0.0f;
 float adc_value1 = 0.0f;
@@ -214,6 +229,10 @@ int main(void)
   MX_TIM2_Init();
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
 
+#if INPUT_MODE == INPUT_MODE_DIGITAL_PULSE
+  PulseInput_Init();
+#endif
+
   /* USER CODE BEGIN 2 */
   HAL_ADCEx_Calibration_Start(&hadc);
   if (HAL_ADC_Start_DMA(&hadc, (uint32_t *)adc_dma_buffer, ADC_CHANNEL_COUNT * ADC_SAMPLES) != HAL_OK)
@@ -286,6 +305,39 @@ int main(void)
   while (1)
   {
 
+#if INPUT_MODE == INPUT_MODE_DIGITAL_PULSE
+    PulseInput_Tick();
+
+    if (PulseInput_IsLinkLost())
+    {
+      // No RMT frames within PULSE_FRAME_TIMEOUT_MS — treat as a safety fault:
+      // persist the error, reboot into the fault-display path (heater off by default).
+      SaveErrorCode(ERROR_LINK_LOST);
+      NVIC_SystemReset();
+    }
+
+    {
+      uint8_t pulse_code = 0U;
+      if (PulseInput_TryGetFrame(&pulse_code))
+      {
+        pulse_frames_received++;
+        pulse_last_frame_tick = HAL_GetTick();
+        if (pulse_code == 0U || pulse_code == (uint8_t)PULSE_OFF_CODE)
+        {
+          // Explicit "off" — either empty frame or the agreed off-code from ESP.
+          mode = MODE_0;
+          pulse_air_target = 0.0f;
+        }
+        else if (pulse_code >= PULSE_MIN_TARGET && pulse_code <= (uint8_t)MAX_AIR_TEMP)
+        {
+          mode = MODE_PULSE;
+          pulse_air_target = (float)pulse_code;
+        }
+        // Out-of-range codes are ignored; previous state is retained until the next frame.
+      }
+    }
+#endif
+
     if (mode == MODE_0)
     {
       //* В режиме 0 смотрим только на нагреватель
@@ -345,6 +397,10 @@ int main(void)
       // float dt = PID_UPDATE_INTERVAL_MS / 1000.0f;
 
       air_target = GetTemperatureByMode(mode);
+#if INPUT_MODE == INPUT_MODE_DIGITAL_PULSE
+      // Command setpoint from the RMT pulse frame replaces the mode-based table.
+      air_target = pulse_air_target;
+#endif
 #if DEVICE_PROFILE == DEVICE_PROFILE_DRYER
       heater_target = ComputeHeaterTarget(air_target);
 #endif
@@ -521,7 +577,7 @@ int main(void)
     }
     /*=================END OF CHECKS============================*/
 
-#if BOARD_REVISION == BOARD_REV_1_1
+#if BOARD_REVISION == BOARD_REV_1_1 && INPUT_MODE != INPUT_MODE_DIGITAL_PULSE
     /*=========================TRIGGER============================*/
     trigger_temp = temperatures[2];
     // //* Fires once when the temperature exceeds the threshold for the first time
@@ -586,6 +642,9 @@ int main(void)
     /*=====================ТРИГГЕР КОНЕЦ==========================*/
 #endif
 
+#if INPUT_MODE != INPUT_MODE_DIGITAL_PULSE
+    // In the pulse build the MODE button is only used at boot to clear persisted errors.
+    // Runtime mode cycling and calibration are disabled here: heating is driven by the RMT link.
     static uint32_t button_press_time = 0;
     static bool button_was_pressed = false;
     static bool long_press_handled = false;
@@ -676,6 +735,7 @@ int main(void)
         HAL_Delay(300); //* Button debounce
       }
     }
+#endif // INPUT_MODE != INPUT_MODE_DIGITAL_PULSE
 
     Update_LEDs(mode, air_temp, 500);
 
@@ -798,8 +858,9 @@ static void MX_ADC_Init(void)
   }
 
   /** Configure for the selected ADC regular channel to be converted.
+   *  Skipped in pulse build — PB1 is an EXTI digital input there.
    */
-#if BOARD_REVISION == BOARD_REV_1_1
+#if BOARD_REVISION == BOARD_REV_1_1 && INPUT_MODE != INPUT_MODE_DIGITAL_PULSE
   sConfig.Channel = ADC_CHANNEL_9;
   if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
   {
@@ -971,6 +1032,55 @@ void Update_LEDs(uint8_t mode, float current_temp, uint32_t speed)
   static bool blink_state = false;
 
   uint32_t tick = HAL_GetTick();
+
+#if INPUT_MODE == INPUT_MODE_DIGITAL_PULSE
+  //* Link-lost fault: all three LEDs blink synchronously.
+  //* Dedicated path because the bit-mask rendering below cannot express 0x08.
+  if (mode == ERROR_LINK_LOST)
+  {
+    if (tick - last_toggle_time >= 2000)
+    {
+      blink_state = !blink_state;
+      last_toggle_time = tick;
+    }
+    GPIO_PinState s = blink_state ? GPIO_PIN_SET : GPIO_PIN_RESET;
+    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, s);
+    HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, s);
+    HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, s);
+    return;
+  }
+
+  //* Boot grace window: waiting for the first frame from iHeater-link.
+  //* Slow chasing light (1 s step) so the user sees that we are coming up, not idle.
+  if (PulseInput_IsWaitingFirstFrame())
+  {
+    uint32_t phase = (tick / 1000U) % 3U;
+    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, phase == 0U ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, phase == 1U ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, phase == 2U ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    return;
+  }
+
+  //* Pulse active heating: chasing light LED1 → LED2 → LED3 at 2 Hz step.
+  if (mode == MODE_PULSE)
+  {
+    uint32_t phase = (tick / 500U) % 3U;
+    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, phase == 0U ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, phase == 1U ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, phase == 2U ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    return;
+  }
+
+  //* Link alive, heating off: LED1 stays solid (heartbeat); LED3 flashes ~80 ms on every accepted frame.
+  if (mode == MODE_0)
+  {
+    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
+    uint32_t since = tick - pulse_last_frame_tick;
+    HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, (since < 80U) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    return;
+  }
+#endif
 
   //* Calibration mode - fast blink 10Hz
   if (mode == CALIBRATION_STEP_1 || mode == CALIBRATION_STEP_2)

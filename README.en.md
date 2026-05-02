@@ -1,7 +1,7 @@
-[![Release](https://img.shields.io/github/v/release/pavluchenkor/iHeater-Standalone-Firmware?include_prereleases&label=latest)](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases)
-[![Docs](https://img.shields.io/badge/docs-view--online-green?logo=readthedocs)](https://docs.idryer.org/iHeater/)
-[![Telegram](https://img.shields.io/badge/Telegram-Join%20Chat-blue?logo=telegram)](https://t.me/iDryer)
-[![Discord](https://img.shields.io/badge/discord-Join%20Chat-5865F2?logo=discord)](https://discord.gg/jGce5eeHHz)
+<!-- [![Release](https://img.shields.io/github/v/release/pavluchenkor/iHeater-Standalone-Firmware?include_prereleases&label=latest)](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases) -->
+<!-- [![Docs](https://img.shields.io/badge/docs-view--online-green?logo=readthedocs)](https://docs.idryer.org/iHeater/) -->
+<!-- [![Telegram](https://img.shields.io/badge/Telegram-Join%20Chat-blue?logo=telegram)](https://t.me/iDryer) -->
+<!-- [![Discord](https://img.shields.io/badge/discord-Join%20Chat-5865F2?logo=discord)](https://discord.gg/jGce5eeHHz) -->
 
 
 # Standalone iHeater Firmware
@@ -92,6 +92,62 @@ With the current settings, the chamber heater will turn on when the bed temperat
 
 It is also possible to select the mode that will be activated when the trigger is engaged. For example, TRIGGER_MODE MODE_2 is currently selected, which means that MODE_TEMP_2 will be activated, setting the chamber temperature to 60.0°C.
 
+
+---
+### Working with iHeater-link (r1.1 pulse build)
+
+The `iheater_rev1_1_pulse` build is designed to pair with the ESP-based iHeater-link module. The module receives commands from the printer, a portal, or a mobile application and forwards the chamber setpoint to iHeater over a single GPIO line. The iHeater firmware is transport-agnostic — it only reads a number: the desired chamber air temperature in °C.
+
+#### Wiring
+
+1. Flash iHeater with the `iheater_rev1_1_pulse` build (see "How to Flash the Firmware").
+2. Connect the signal wire from iHeater-link to the **TH2** connector on the iHeater board (pin PB1).
+3. A common GND between the ESP and iHeater is mandatory — use a dedicated ground wire.
+4. Keep the heater thermistor on its usual **TH0** connector. Keep the air thermistor on **TH1**. Both work exactly as in any other build.
+5. The trigger connector is not used in this build (its line is repurposed as the digital input).
+
+!!! warning "Never connect or disconnect the signal wire with power applied."
+
+#### Accepted commands
+
+| Code from iHeater-link | Meaning |
+|------------------------|---------|
+| `0`                    | Heater off |
+| `10`                   | Heater off (agreed "off-code") |
+| `45..90`               | Heater on, air setpoint equals the code in °C |
+| Any other value        | Ignored; previous state is kept |
+
+The minimum `45 °C` is defined in `config.h` as `PULSE_MIN_TARGET`. The maximum is bounded by `MAX_AIR_TEMP` (90 °C by default).
+
+#### LED indication
+
+| State | LED1 | LED2 | LED3 |
+|-------|------|------|------|
+| Waiting for the first frame after boot (up to 20 s) | chasing light LED1 → LED2 → LED3 with a 1000 ms step | | |
+| Link OK, heating off | solid on (link-alive heartbeat) | off | short ~80 ms flash on every accepted frame |
+| Link OK, heating on  | chasing light LED1 → LED2 → LED3 with a 500 ms step | | |
+| Link lost (>1.5 s with no frame after the first one) | All three blink together; the device resets with error code `0x08` (`ERROR_LINK_LOST`). The heater stays off. | | |
+
+Standard faults (overheat, open thermistor, heater-no-response) work exactly as in analog builds — see "Error Handling".
+
+#### Link-lost behaviour
+
+iHeater and iHeater-link can be powered up simultaneously. iHeater-link needs time to bring up Wi-Fi and connect to its command source, so for the first **20 seconds** after boot the firmware does **not** treat the absence of frames as a fault and shows a slow chasing light (1000 ms step) — "waiting for the first frame".
+
+If no valid frame is received during this 20-second window, the firmware enters `ERROR_LINK_LOST` exactly as it would after a runtime drop.
+
+Once the first frame has been received, the normal rule applies: a gap of more than 1.5 seconds with no frames triggers the fault.
+
+When the fault fires:
+
+1. The firmware persists error code `0x08` (`ERROR_LINK_LOST`) in flash.
+2. The MCU is reset.
+3. After the reset the heater is off; the firmware again opens a 20-second waiting window with the slow chasing light, then falls back to the slow synchronous blink of all three LEDs.
+4. To clear the error, hold the MODE button while powering the device on, then release it. The device returns to normal operation.
+
+#### MODE button
+
+In the pulse build, the MODE button **does not cycle modes and does not trigger calibration**. Its only purpose is clearing a persisted error at startup. All heating commands come from iHeater-link.
 
 ---
 
@@ -193,6 +249,7 @@ The device auto-resets and shows an error code using LED indicators. The fan wil
 | 0x05  | Heater thermistor disconnected             |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](img/ball_gifs/black_ball.gif) |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)   |
 | 0x06  | Heater overtemperature                     |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif) |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](img/ball_gifs/black_ball.gif)   |
 | 0x07  | Air overtemperature                        |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)   |
+| 0x08  | iHeater-link lost (pulse build only)       | 0.25 Hz | 0.25 Hz | 0.25 Hz |
 | 0xFF  | Unknown error                              |![LED ON](img/ball_gifs/red_ball.gif)  | ![LED ON](img/ball_gifs/red_ball.gif)|![LED ON](img/ball_gifs/red_ball.gif)  |
 
 
@@ -204,7 +261,7 @@ Hold the MODE button during startup until the LEDs change. The stored error will
 
 ## Fine Tuning
 
-If there is confirmation that the thermocouple readings deviate from the actual temperature, the fine tuning function can be used. For this purpose, it is necessary to measure the resistance of the corresponding resistors and record these values instead of the default ones.
+If there is confirmation that the thermistor readings deviate from the actual temperature, the fine tuning function can be used. For this purpose, it is necessary to measure the resistance of the corresponding resistors and record these values instead of the default ones.
 
 
 ```C++ title="Actual resistance of the pull-up resistors"
