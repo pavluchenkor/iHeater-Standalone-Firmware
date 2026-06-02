@@ -6,33 +6,33 @@
 
 /**
  * @file ema_filter.h
- * @brief Заголовочный файл для экспоненциального скользящего среднего фильтра (EMA).
+ * @brief Header file for the exponential moving average (EMA) filter.
  */
 
 /**
  * @struct EmaFilter
- * @brief Структура фильтра EMA, содержащая текущее сглаженное значение и коэффициент alpha.
+ * @brief An EMA filter structure containing the current smoothed value and the alpha coefficient.
  */
 typedef struct {
-    float alpha;          //* Коэффициент фильтрации (0.0f ... 1.0f).
-    float filtered;       //* Текущее сглаженное значение.
-    bool initialized;     //* Флаг, указывающий, было ли произведено первое обновление.
+    float alpha;          //* Filter coefficient (0.0f ... 1.0f).
+    float filtered;       //* Current smoothed value.
+    bool initialized;     //* Flag indicating whether the first update has occurred.
 } EmaFilter;
 
 /**
- * @brief Инициализация фильтра EMA.
+ * @brief Initialize the EMA filter.
  *
- * @param f Указатель на структуру фильтра.
- * @param alpha Коэффициент сглаживания (чем меньше, тем сильнее фильтрация).
+ * @param f Pointer to the filter structure.
+ * @param alpha Smoothing coefficient (the smaller the value, the stronger the filtering).
  */
 void ema_filter_init(EmaFilter *f, float alpha);
 
 /**
- * @brief Обновление фильтра EMA новым значением.
+ * @brief Update the EMA filter with a new value.
  *
- * @param f Указатель на структуру фильтра.
- * @param new_value Новое входное значение.
- * @return Обновлённое сглаженное значение.
+ * @param f Pointer to the filter structure.
+ * @param new_value New input value.
+ * @return Updated smoothed value.
  */
 float ema_filter_update(EmaFilter *f, float new_value);
 

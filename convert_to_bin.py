@@ -2,13 +2,13 @@ Import("env")
 import re
 import os
 
-# Путь к version.h
+# Path to version.h
 version_file = "Core/Inc/version.h"
 
-# Значения по умолчанию
+# Default values
 major = minor = patch = 0
 
-# Ищем нужные define'ы в version.h
+# We look for the necessary defines in version.h
 try:
     with open(version_file, "r") as f:
         for line in f:
@@ -21,7 +21,7 @@ try:
 except FileNotFoundError:
     print(f"WARNING: {version_file} not found, using version 0.0.0")
 
-# Формируем имя файла
+# Build the output file name
 version_str = f"{major}.{minor}.{patch}"
 firmware_dir = "Firmware"
 profile_name = env.get("PIOENV", "unknown")
@@ -29,7 +29,7 @@ output_bin = os.path.join(firmware_dir, f"{profile_name}_v{version_str}.bin")
 
 
 
-# Убедимся, что папка Firmware существует
+# Make sure the Firmware folder exists.
 os.makedirs(firmware_dir, exist_ok=True)
 
 env.AddPostAction(
