@@ -1,0 +1,5 @@
+title: iHeater Standalone
+nav:
+  - Прошивка: README.md
+  - Сборка: assembly.md
+  - Триггер: trigger.md

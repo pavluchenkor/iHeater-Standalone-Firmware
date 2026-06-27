@@ -1,0 +1,5 @@
+title: iHeater independiente
+nav:
+  - Firmware: README.md
+  - Montaje: assembly.md
+  - Activador: trigger.md

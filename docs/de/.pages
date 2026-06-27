@@ -1,0 +1,5 @@
+title: iHeater Standalone
+nav:
+  - Firmware: README.md
+  - Montage: assembly.md
+  - Trigger: trigger.md

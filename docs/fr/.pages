@@ -1,0 +1,5 @@
+title: iHeater autonome
+nav:
+  - Micrologiciel: README.md
+  - Assemblage: assembly.md
+  - Déclencheur: trigger.md

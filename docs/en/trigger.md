@@ -139,12 +139,12 @@ At **any step** — **short press the button** → calibration cancelled, previo
 
 | State | LED1 | LED2 | LED3 | Description |
 |-------|------|------|------|-------------|
-| Standby (MODE 0) | ![off](img/ball_gifs/black_ball.gif) | ![off](img/ball_gifs/black_ball.gif) | ![off](img/ball_gifs/black_ball.gif) | iHeater off, trigger waiting |
-| Trigger activated (heating) | ![off](img/ball_gifs/black_ball.gif) | ![blink](img/ball_gifs/blinking_ball.gif) | ![off](img/ball_gifs/black_ball.gif) | iHeater heating to target temperature |
-| Trigger activated (ready) | ![off](img/ball_gifs/black_ball.gif) | ![on](img/ball_gifs/red_ball.gif) | ![off](img/ball_gifs/black_ball.gif) | iHeater reached target temperature (60°C) |
-| Calibration step 1 | ![blink](img/ball_gifs/blinking_ball_10hz.gif) | ![off](img/ball_gifs/black_ball.gif) | ![off](img/ball_gifs/black_ball.gif) | Setting ON threshold |
-| Calibration step 2 | ![blink](img/ball_gifs/blinking_ball_10hz.gif) | ![blink](img/ball_gifs/blinking_ball_10hz.gif) | ![off](img/ball_gifs/black_ball.gif) | Setting OFF threshold |
-| Calibration complete | ![blink](img/ball_gifs/blinking_ball_10hz.gif) | ![blink](img/ball_gifs/blinking_ball_10hz.gif) | ![blink](img/ball_gifs/blinking_ball_10hz.gif) | 3 times — success |
+| Standby (MODE 0) | ![off](../img/ball_gifs/black_ball.gif) | ![off](../img/ball_gifs/black_ball.gif) | ![off](../img/ball_gifs/black_ball.gif) | iHeater off, trigger waiting |
+| Trigger activated (heating) | ![off](../img/ball_gifs/black_ball.gif) | ![blink](../img/ball_gifs/blinking_ball.gif) | ![off](../img/ball_gifs/black_ball.gif) | iHeater heating to target temperature |
+| Trigger activated (ready) | ![off](../img/ball_gifs/black_ball.gif) | ![on](../img/ball_gifs/red_ball.gif) | ![off](../img/ball_gifs/black_ball.gif) | iHeater reached target temperature (60°C) |
+| Calibration step 1 | ![blink](../img/ball_gifs/blinking_ball_10hz.gif) | ![off](../img/ball_gifs/black_ball.gif) | ![off](../img/ball_gifs/black_ball.gif) | Setting ON threshold |
+| Calibration step 2 | ![blink](../img/ball_gifs/blinking_ball_10hz.gif) | ![blink](../img/ball_gifs/blinking_ball_10hz.gif) | ![off](../img/ball_gifs/black_ball.gif) | Setting OFF threshold |
+| Calibration complete | ![blink](../img/ball_gifs/blinking_ball_10hz.gif) | ![blink](../img/ball_gifs/blinking_ball_10hz.gif) | ![blink](../img/ball_gifs/blinking_ball_10hz.gif) | 3 times — success |
 
 ---
 

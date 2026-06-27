@@ -11,7 +11,7 @@ iHeater - это компактное и доступное решение дл�
 
 Может работать самостоятельно с собственной прошивкой как отдельное устройство или под управлением Klipper с подключением к принтеру по USB
 
-![iHeater](img/iHeater_200.png)
+![iHeater](../img/iHeater_200.png)
 
 ---
 
@@ -66,14 +66,14 @@ iHeater - это компактное и доступное решение дл�
 
 | Mode   | Temperature | LED3 | LED2 | LED1 |
 |--------|-------------|------|------|------|
-| MODE_TEMP_0  | 0.0°C       |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |
-| MODE_TEMP_1  | 55.0°C      |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |
-| MODE_TEMP_2  | 60.0°C      |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |
-| MODE_TEMP_3  | 65.0°C      |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |
-| MODE_TEMP_4  | 70.0°C      |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |
-| MODE_TEMP_5  | 75.0°C      |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |
-| MODE_TEMP_6  | 80.0°C      |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |
-| MODE_TEMP_7  | 85.0°C      |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |
+| MODE_TEMP_0  | 0.0°C       |![LED OFF](../img/ball_gifs/black_ball.gif)   |![LED OFF](../img/ball_gifs/black_ball.gif)   |![LED OFF](../img/ball_gifs/black_ball.gif)   |
+| MODE_TEMP_1  | 55.0°C      |![LED OFF](../img/ball_gifs/black_ball.gif)   |![LED OFF](../img/ball_gifs/black_ball.gif)   |![LED 1Hz](../img/ball_gifs/blinking_ball.gif)   |
+| MODE_TEMP_2  | 60.0°C      |![LED OFF](../img/ball_gifs/black_ball.gif)   |![LED 1Hz](../img/ball_gifs/blinking_ball.gif)   |![LED OFF](../img/ball_gifs/black_ball.gif)   |
+| MODE_TEMP_3  | 65.0°C      |![LED OFF](../img/ball_gifs/black_ball.gif)   |![LED 1Hz](../img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](../img/ball_gifs/blinking_ball.gif)   |
+| MODE_TEMP_4  | 70.0°C      |![LED 1Hz](../img/ball_gifs/blinking_ball.gif)   |![LED OFF](../img/ball_gifs/black_ball.gif)   |![LED OFF](../img/ball_gifs/black_ball.gif)   |
+| MODE_TEMP_5  | 75.0°C      |![LED 1Hz](../img/ball_gifs/blinking_ball.gif)   |![LED OFF](../img/ball_gifs/black_ball.gif)   |![LED 1Hz](../img/ball_gifs/blinking_ball.gif)   |
+| MODE_TEMP_6  | 80.0°C      |![LED 1Hz](../img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](../img/ball_gifs/blinking_ball.gif)   |![LED OFF](../img/ball_gifs/black_ball.gif)   |
+| MODE_TEMP_7  | 85.0°C      |![LED 1Hz](../img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](../img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](../img/ball_gifs/blinking_ball.gif)   |
 
 ---
 ### Автоматическое включение и выключение r1.1
@@ -232,15 +232,15 @@ iHeater - это компактное и доступное решение дл�
 
 | Code  | Description                               | LED3 | LED2 | LED1  |
 |-------|-------------------------------------------|------|------|-------|
-| 0x01  | Air failed to reach target in time        |![LED OFF](img/ball_gifs/black_ball.gif)  |![LED OFF](img/ball_gifs/black_ball.gif) |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |
-| 0x02  | Heater not responding                     |![LED OFF](img/ball_gifs/black_ball.gif) |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](img/ball_gifs/black_ball.gif)  |
-| 0x03  | Manual shutdown (unused)                  |![LED OFF](img/ball_gifs/black_ball.gif)  |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |
-| 0x04  | Air thermistor disconnected                |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif) |![LED OFF](img/ball_gifs/black_ball.gif) |![LED OFF](img/ball_gifs/black_ball.gif)   |
-| 0x05  | Heater thermistor disconnected             |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](img/ball_gifs/black_ball.gif) |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)   |
-| 0x06  | Heater overtemperature                     |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif) |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](img/ball_gifs/black_ball.gif)   |
-| 0x07  | Air overtemperature                        |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)   |
+| 0x01  | Air failed to reach target in time        |![LED OFF](../img/ball_gifs/black_ball.gif)  |![LED OFF](../img/ball_gifs/black_ball.gif) |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |
+| 0x02  | Heater not responding                     |![LED OFF](../img/ball_gifs/black_ball.gif) |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](../img/ball_gifs/black_ball.gif)  |
+| 0x03  | Manual shutdown (unused)                  |![LED OFF](../img/ball_gifs/black_ball.gif)  |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |
+| 0x04  | Air thermistor disconnected                |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif) |![LED OFF](../img/ball_gifs/black_ball.gif) |![LED OFF](../img/ball_gifs/black_ball.gif)   |
+| 0x05  | Heater thermistor disconnected             |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](../img/ball_gifs/black_ball.gif) |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)   |
+| 0x06  | Heater overtemperature                     |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif) |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](../img/ball_gifs/black_ball.gif)   |
+| 0x07  | Air overtemperature                        |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)   |
 | 0x08  | Потеряна связь с iHeater-link (только pulse-сборка) | 0.25 Гц | 0.25 Гц | 0.25 Гц |
-| 0xFF  | Unknown error                              |![LED ON](img/ball_gifs/red_ball.gif)  | ![LED ON](img/ball_gifs/red_ball.gif)|![LED ON](img/ball_gifs/red_ball.gif)  |
+| 0xFF  | Unknown error                              |![LED ON](../img/ball_gifs/red_ball.gif)  | ![LED ON](../img/ball_gifs/red_ball.gif)|![LED ON](../img/ball_gifs/red_ball.gif)  |
 
 
 

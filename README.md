@@ -9,7 +9,7 @@ iHeater is a compact and affordable solution for 3D printers without an active h
 
 It can operate standalone with its own firmware or be integrated with Klipper over USB.
 
-![iHeater](imgweb/iHeater_200.png)
+![iHeater](docs/img/iHeater_200.png)
 
 ---
 
@@ -63,14 +63,14 @@ When entering the mode, the LEDs blink, once the mode is activated, they remain 
 
 | Mode   | Temperature | LED3 | LED2 | LED1 |
 |--------|-------------|------|------|------|
-| MODE_TEMP_0  | 0.0°C       |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |
-| MODE_TEMP_1  | 55.0°C      |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |
-| MODE_TEMP_2  | 60.0°C      |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |
-| MODE_TEMP_3  | 65.0°C      |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |
-| MODE_TEMP_4  | 70.0°C      |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |
-| MODE_TEMP_5  | 75.0°C      |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |
-| MODE_TEMP_6  | 80.0°C      |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED OFF](img/ball_gifs/black_ball.gif)   |
-| MODE_TEMP_7  | 85.0°C      |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](img/ball_gifs/blinking_ball.gif)   |
+| MODE_TEMP_0  | 0.0°C       |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |
+| MODE_TEMP_1  | 55.0°C      |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |
+| MODE_TEMP_2  | 60.0°C      |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |
+| MODE_TEMP_3  | 65.0°C      |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |
+| MODE_TEMP_4  | 70.0°C      |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |
+| MODE_TEMP_5  | 75.0°C      |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |
+| MODE_TEMP_6  | 80.0°C      |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |
+| MODE_TEMP_7  | 85.0°C      |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |
 
 
 ---
@@ -185,14 +185,14 @@ The device auto-resets and shows an error code using LED indicators. The fan wil
 
 | Code  | Description                               | LED3 | LED2 | LED1  |
 |-------|-------------------------------------------|------|------|-------|
-| 0x01  | Air failed to reach target in time        |![LED OFF](img/ball_gifs/black_ball.gif)  |![LED OFF](img/ball_gifs/black_ball.gif) |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |
-| 0x02  | Heater not responding                     |![LED OFF](img/ball_gifs/black_ball.gif) |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](img/ball_gifs/black_ball.gif)  |
-| 0x03  | Manual shutdown (unused)                  |![LED OFF](img/ball_gifs/black_ball.gif)  |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |
-| 0x04  | Air thermistor disconnected                |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif) |![LED OFF](img/ball_gifs/black_ball.gif) |![LED OFF](img/ball_gifs/black_ball.gif)   |
-| 0x05  | Heater thermistor disconnected             |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](img/ball_gifs/black_ball.gif) |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)   |
-| 0x06  | Heater overtemperature                     |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif) |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](img/ball_gifs/black_ball.gif)   |
-| 0x07  | Air overtemperature                        |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](img/ball_gifs/blinking_ball_10hz.gif)   |
-| 0xFF  | Unknown error                              |![LED ON](img/ball_gifs/red_ball.gif)  | ![LED ON](img/ball_gifs/red_ball.gif)|![LED ON](img/ball_gifs/red_ball.gif)  |
+| 0x01  | Air failed to reach target in time        |![LED OFF](docs/img/ball_gifs/black_ball.gif)  |![LED OFF](docs/img/ball_gifs/black_ball.gif) |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif)  |
+| 0x02  | Heater not responding                     |![LED OFF](docs/img/ball_gifs/black_ball.gif) |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](docs/img/ball_gifs/black_ball.gif)  |
+| 0x03  | Manual shutdown (unused)                  |![LED OFF](docs/img/ball_gifs/black_ball.gif)  |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif)  |
+| 0x04  | Air thermistor disconnected                |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif) |![LED OFF](docs/img/ball_gifs/black_ball.gif) |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |
+| 0x05  | Heater thermistor disconnected             |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](docs/img/ball_gifs/black_ball.gif) |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif)   |
+| 0x06  | Heater overtemperature                     |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif) |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |
+| 0x07  | Air overtemperature                        |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif)   |
+| 0xFF  | Unknown error                              |![LED ON](docs/img/ball_gifs/red_ball.gif)  | ![LED ON](docs/img/ball_gifs/red_ball.gif)|![LED ON](docs/img/ball_gifs/red_ball.gif)  |
 
 
 ### Resetting an Error

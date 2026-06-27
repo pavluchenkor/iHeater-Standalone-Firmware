@@ -1,0 +1,5 @@
+title: スタンドアロン iHeater
+nav:
+  - ファームウェア: README.md
+  - 組み立て: assembly.md
+  - トリガー: trigger.md

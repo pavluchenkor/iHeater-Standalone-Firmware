@@ -5,7 +5,8 @@
       "Bash(mdfind -name \"flows.json\")",
       "Read(//Users/ruslanpavlucenko/Library/stm32cubemonitor/**)",
       "Bash(python3 *)",
-      "Bash(jq *)"
+      "Bash(jq *)",
+      "Bash(gh pr *)"
     ]
   }
 }

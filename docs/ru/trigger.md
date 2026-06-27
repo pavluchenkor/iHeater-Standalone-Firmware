@@ -139,12 +139,12 @@
 
 | Состояние | LED1 | LED2 | LED3 | Описание |
 |-----------|------|------|------|----------|
-| Ожидание (MODE 0) | ![off](img/ball_gifs/black_ball.gif) | ![off](img/ball_gifs/black_ball.gif) | ![off](img/ball_gifs/black_ball.gif) | iHeater выключен, триггер ожидает |
-| Триггер сработал (нагрев) | ![off](img/ball_gifs/black_ball.gif) | ![blink](img/ball_gifs/blinking_ball.gif) | ![off](img/ball_gifs/black_ball.gif) | iHeater нагревается до целевой температуры |
-| Триггер сработал (готов) | ![off](img/ball_gifs/black_ball.gif) | ![on](img/ball_gifs/red_ball.gif) | ![off](img/ball_gifs/black_ball.gif) | iHeater достиг целевой температуры (60°C) |
-| Калибровка шаг 1 | ![blink](img/ball_gifs/blinking_ball_10hz.gif) | ![off](img/ball_gifs/black_ball.gif) | ![off](img/ball_gifs/black_ball.gif) | Установка порога ВКЛ |
-| Калибровка шаг 2 | ![blink](img/ball_gifs/blinking_ball_10hz.gif) | ![blink](img/ball_gifs/blinking_ball_10hz.gif) | ![off](img/ball_gifs/black_ball.gif) | Установка порога ВЫКЛ |
-| Калибровка завершена | ![blink](img/ball_gifs/blinking_ball_10hz.gif) | ![blink](img/ball_gifs/blinking_ball_10hz.gif) | ![blink](img/ball_gifs/blinking_ball_10hz.gif) | 3 раза — успех |
+| Ожидание (MODE 0) | ![off](../img/ball_gifs/black_ball.gif) | ![off](../img/ball_gifs/black_ball.gif) | ![off](../img/ball_gifs/black_ball.gif) | iHeater выключен, триггер ожидает |
+| Триггер сработал (нагрев) | ![off](../img/ball_gifs/black_ball.gif) | ![blink](../img/ball_gifs/blinking_ball.gif) | ![off](../img/ball_gifs/black_ball.gif) | iHeater нагревается до целевой температуры |
+| Триггер сработал (готов) | ![off](../img/ball_gifs/black_ball.gif) | ![on](../img/ball_gifs/red_ball.gif) | ![off](../img/ball_gifs/black_ball.gif) | iHeater достиг целевой температуры (60°C) |
+| Калибровка шаг 1 | ![blink](../img/ball_gifs/blinking_ball_10hz.gif) | ![off](../img/ball_gifs/black_ball.gif) | ![off](../img/ball_gifs/black_ball.gif) | Установка порога ВКЛ |
+| Калибровка шаг 2 | ![blink](../img/ball_gifs/blinking_ball_10hz.gif) | ![blink](../img/ball_gifs/blinking_ball_10hz.gif) | ![off](../img/ball_gifs/black_ball.gif) | Установка порога ВЫКЛ |
+| Калибровка завершена | ![blink](../img/ball_gifs/blinking_ball_10hz.gif) | ![blink](../img/ball_gifs/blinking_ball_10hz.gif) | ![blink](../img/ball_gifs/blinking_ball_10hz.gif) | 3 раза — успех |
 
 ---
 
