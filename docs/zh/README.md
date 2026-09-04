@@ -262,4 +262,4 @@ iHeater 是一种紧凑且可靠的解决方案，适用于没有主动恒温室
 
 ---
 
-此软件根据 GNU General Public License v3.0 获得许可，仅供非商业使用。
+此软件根据 Apache License 2.0 授权发布，允许商业使用。详情见 [LICENSE](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/blob/main/LICENSE) 文件。

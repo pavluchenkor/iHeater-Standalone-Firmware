@@ -262,4 +262,4 @@ iHeater 是一個小巧且經濟高效的解決方案，適用於沒有主動恆
 
 ---
 
-此軟體根據 GNU General Public License v3.0 僅許可用於非商業目的。
+此軟體依 Apache License 2.0 授權發布，允許商業使用。詳情見 [LICENSE](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/blob/main/LICENSE) 文件。

@@ -272,4 +272,4 @@ If there is confirmation that the thermistor readings deviate from the actual te
 
 ---
 
-This software is licensed under the GNU General Public License v3.0 for non-commercial use only.
+This software is licensed under the Apache License 2.0. Commercial use is permitted. See the [LICENSE](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/blob/main/LICENSE) file for details.

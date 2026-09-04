@@ -262,4 +262,4 @@ Au cas où il y aurait confirmation que les lectures de thermistance diffèrent 
 
 ---
 
-Ce logiciel est autorisé en vertu de la GNU General Public License v3.0 pour un usage non commercial uniquement.
+Ce logiciel est distribué sous licence Apache 2.0. L'usage commercial est autorisé. Les détails se trouvent dans le fichier [LICENSE](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/blob/main/LICENSE).
