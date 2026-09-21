@@ -120,27 +120,28 @@ El mínimo de `45 °C` se establece en `config.h` con la macro `PULSE_MIN_TARGET
 
 | Estado | LED1 | LED2 | LED3 |
 |-----------|------|------|------|
-| Espera del primer paquete después del encendido (hasta 20 s) | LED corriente LED1 → LED2 → LED3 con paso de 1000 ms | | |
+| Espera del primer paquete después del encendido | LED corriente LED1 → LED2 → LED3 con paso de 1000 ms | | |
 | Conexión OK, calefacción apagada | encendido constante (latido de "conexión activa") | apagado | destello corto ~80 ms para cada paquete recibido |
-| Conexión OK, calefacción encendida | LED corriente LED1 → LED2 → LED3 con paso de 500 ms | | |
-| Conexión perdida (más de 1.5 s sin paquete después de la primera conexión) | Los tres parpadean sincrónicamente; el dispositivo se reinicia con código de error `0x08` (`ERROR_LINK_LOST`). El calentador está apagado. | | |
+| Conexión OK, calefacción encendida | LED corriente LED1 → LED2 → LED3 con paso de 200 ms | | |
+| Conexión perdida (más de 5 s sin paquete después de la primera conexión) | "Baliza": los tres LED destellan a la vez durante ~100 ms cada 2 s. El calentador está apagado, el ventilador está encendido. | | |
 
 Los errores estándar (sobrecalentamiento, rotura de termistor, calentador que no responde) funcionan como en las construcciones analógicas - véase la sección "Qué hacer en caso de error".
 
 #### Comportamiento al perder conexión
 
-Después del encendido, iHeater e iHeater-link pueden iniciarse simultáneamente. El módulo iHeater-link necesita tiempo para inicializar Wi-Fi y conectarse a la fuente de comandos, por lo que en los primeros **20 segundos** después del inicio, el firmware de iHeater **no considera la ausencia de paquetes como un error** y muestra una corriente lenta (paso de 1000 ms) - "esperando el primer paquete".
+El firmware retira la calefacción cuando dejan de llegar comandos de iHeater-link y reanuda el funcionamiento cuando vuelven a llegar.
 
-Si después de estos 20 segundos aún no ha llegado ningún paquete correcto, el firmware entra en `ERROR_LINK_LOST` igual que al perder conexión en modo normal.
+Después del encendido, el firmware espera el primer paquete y muestra una corriente lenta (paso de 1000 ms). El calentador está apagado. La espera no tiene límite de tiempo: mientras la conexión no se haya establecido nunca, la ausencia de paquetes no se considera una pérdida de conexión.
 
-Después de que se recibe el primer paquete, se aplica la regla normal: pérdida de paquetes por más de 1.5 segundos → error.
+Después de recibir el primer paquete, se aplica la regla: si no llegan paquetes durante más de **5 segundos**, la conexión se considera perdida. Durante estos 5 segundos, iHeater sigue funcionando según el último comando.
 
-Algoritmo cuando se activa un error:
+Al perder la conexión:
 
-1. El firmware guarda en flash el código de error `0x08` (`ERROR_LINK_LOST`).
-2. Reinicia el controlador.
-3. Después del reinicio, el calentador está apagado; durante una nueva ventana de 20 segundos nuevamente una corriente lenta de espera, luego parpadeo lento de todos los LED.
-4. Para borrar el error, mantenga presionado el botón MODE al aplicar la alimentación, luego suéltelo. El dispositivo volverá al funcionamiento normal.
+1. El calentador se apaga.
+2. El ventilador se enciende y funciona hasta que se restablece la conexión.
+3. Los LED muestran la "baliza": los tres LED destellan durante ~100 ms cada 2 s.
+
+No se guarda ningún error en flash, el controlador no se reinicia y no es necesario pulsar el botón MODE. Cuando los paquetes vuelven a llegar, iHeater ejecuta el comando recibido: con una consigna `45..90` reanuda la calefacción; con `0` o `10` permanece apagado.
 
 #### Botón MODE
 
@@ -237,7 +238,7 @@ El dispositivo se reinicia automáticamente y muestra el código de error con LE
 | 0x05  | Termistor del calentador desconectado             |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](../img/ball_gifs/black_ball.gif) |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)   |
 | 0x06  | Sobrecalentamiento del calentador                     |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif) |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](../img/ball_gifs/black_ball.gif)   |
 | 0x07  | Sobrecalentamiento del aire                        |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)   |
-| 0x08  | Conexión perdida con iHeater-link (solo construcción pulse) | 0.25 Гц | 0.25 Гц | 0.25 Гц |
+| 0x08  | Conexión perdida con iHeater-link (construcción pulse v0.5.0; desde v0.5.1 ya no se guarda) | 0.25 Hz | 0.25 Hz | 0.25 Hz |
 | 0xFF  | Error desconocido                              |![LED ON](../img/ball_gifs/red_ball.gif)  | ![LED ON](../img/ball_gifs/red_ball.gif)|![LED ON](../img/ball_gifs/red_ball.gif)  |
 
 

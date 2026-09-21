@@ -122,27 +122,28 @@ Le minimum `45 °C` est défini dans `config.h` par la macro `PULSE_MIN_TARGET`.
 
 | État | LED1 | LED2 | LED3 |
 |-----------|------|------|------|
-| Attente du premier paquet après activation (jusqu'à 20 s) | feu clignotant LED1 → LED2 → LED3 avec étape de 1000 ms | | |
+| Attente du premier paquet après activation | feu clignotant LED1 → LED2 → LED3 avec étape de 1000 ms | | |
 | Connexion OK, chauffage désactivé | allumée en permanence (battement de cœur « connexion active ») | éteinte | courte impulsion ~80 ms pour chaque paquet reçu |
-| Connexion OK, chauffage activé | feu clignotant LED1 → LED2 → LED3 avec étape de 500 ms | | |
-| Connexion perdue (plus de 1.5 s sans paquet après la première connexion) | Les trois clignotent de façon synchrone ; le dispositif redémarre avec le code d'erreur `0x08` (`ERROR_LINK_LOST`). Le radiateur est désactivé. | | |
+| Connexion OK, chauffage activé | feu clignotant LED1 → LED2 → LED3 avec étape de 200 ms | | |
+| Connexion perdue (plus de 5 s sans paquet après la première connexion) | « Balise » : les trois LED s'allument ensemble pendant ~100 ms toutes les 2 s. Le radiateur est désactivé, le ventilateur est activé. | | |
 
 Les erreurs standards (surchauffe, thermistance cassée, radiateur ne répond pas) fonctionnent comme dans les builds analogues - voir la section « Que faire en cas d'erreur ».
 
 #### Comportement en cas de perte de connexion
 
-Après la mise sous tension de iHeater et iHeater-link, ils peuvent démarrer simultanément. Le module iHeater-link a besoin de temps pour l'initialisation du Wi-Fi et la connexion à la source de commandes, donc dans les premiers **20 secondes** après le démarrage, le firmware iHeater **ne considère pas l'absence de paquets comme une erreur** et affiche un feu clignotant lent (étape de 1000 ms) - « en attente du premier paquet ».
+Le firmware coupe le chauffage lorsque les commandes d'iHeater-link cessent d'arriver et reprend le fonctionnement lorsqu'elles arrivent à nouveau.
 
-Si aucun paquet correct n'arrive pendant ces 20 secondes, le firmware entre en `ERROR_LINK_LOST` de la même manière que lors de la perte de connexion en mode normal.
+Après la mise sous tension, le firmware attend le premier paquet et affiche un feu clignotant lent (étape de 1000 ms). Le radiateur est désactivé. L'attente n'est pas limitée dans le temps : tant que la connexion n'a jamais été établie, l'absence de paquets n'est pas considérée comme une perte de connexion.
 
-Une fois que le premier paquet est reçu, la règle normale s'applique : la perte de paquets pendant plus de 1.5 secondes → erreur.
+Une fois le premier paquet reçu, la règle suivante s'applique : si aucun paquet n'arrive pendant plus de **5 secondes**, la connexion est considérée comme perdue. Pendant ces 5 secondes, iHeater continue d'exécuter la dernière commande.
 
-Algorithme lors du déclenchement d'une erreur :
+En cas de perte de connexion :
 
-1. Le firmware sauvegarde le code d'erreur `0x08` (`ERROR_LINK_LOST`) dans la flash.
-2. Redémarre le contrôleur.
-3. Après le redémarrage, le radiateur est désactivé ; pendant la nouvelle fenêtre de 20 secondes, à nouveau un feu clignotant en attente, puis un clignotement lent de tous les LED.
-4. Pour réinitialiser l'erreur, maintenez le bouton MODE lors de la mise sous tension, puis relâchez. L'appareil reviendra au fonctionnement normal.
+1. Le radiateur est désactivé.
+2. Le ventilateur est activé et fonctionne jusqu'au rétablissement de la connexion.
+3. Les LED affichent la « balise » : les trois LED s'allument pendant ~100 ms toutes les 2 s.
+
+Aucune erreur n'est enregistrée dans la flash, le contrôleur ne redémarre pas et il n'est pas nécessaire d'appuyer sur le bouton MODE. Lorsque les paquets arrivent à nouveau, iHeater exécute la commande reçue : avec une consigne `45..90`, il reprend le chauffage ; avec `0` ou `10`, il reste désactivé.
 
 #### Bouton MODE
 
@@ -239,7 +240,7 @@ L'appareil redémarre automatiquement et affiche le code d'erreur à l'aide des 
 | 0x05  | Thermistance du radiateur déconnectée             |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](../img/ball_gifs/black_ball.gif) |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)   |
 | 0x06  | Surchauffe du radiateur                     |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif) |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](../img/ball_gifs/black_ball.gif)   |
 | 0x07  | Surchauffe de l'air                        |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)   |
-| 0x08  | Connexion perdue avec iHeater-link (build pulse uniquement) | 0.25 Hz | 0.25 Hz | 0.25 Hz |
+| 0x08  | Connexion perdue avec iHeater-link (build pulse v0.5.0 ; n'est plus enregistré depuis v0.5.1) | 0.25 Hz | 0.25 Hz | 0.25 Hz |
 | 0xFF  | Erreur inconnue                              |![LED ON](../img/ball_gifs/red_ball.gif)  | ![LED ON](../img/ball_gifs/red_ball.gif)|![LED ON](../img/ball_gifs/red_ball.gif)  |
 
 

@@ -122,27 +122,28 @@ O mínimo `45 °C` é definido em `config.h` pela macro `PULSE_MIN_TARGET`. O m�
 
 | Estado | LED1 | LED2 | LED3 |
 |-----------|------|------|------|
-| Aguardando primeiro pacote após inicialização (até 20 s) | LED a correr LED1 → LED2 → LED3 com passo de 1000 ms | | |
+| Aguardando primeiro pacote após inicialização | LED a correr LED1 → LED2 → LED3 com passo de 1000 ms | | |
 | Ligação OK, aquecimento desativado | iluminado continuamente (heartbeat "ligação ativa") | apagado | piscada curta ~80 ms em cada pacote recebido |
-| Ligação OK, aquecimento ativado | LED a correr LED1 → LED2 → LED3 com passo de 500 ms | | |
-| Ligação perdida (mais de 1,5 s sem pacote após primeira conexão) | Todos os três piscam sincronamente; o dispositivo reinicia com código de erro `0x08` (`ERROR_LINK_LOST`). Aquecedor desativado. | | |
+| Ligação OK, aquecimento ativado | LED a correr LED1 → LED2 → LED3 com passo de 200 ms | | |
+| Ligação perdida (mais de 5 s sem pacote após primeira conexão) | "Farol": os três LEDs piscam em simultâneo durante ~100 ms a cada 2 s. Aquecedor desativado, ventilador ativado. | | |
 
 Os erros normais (sobreaquecimento, termistor desligado, aquecedor não responde) funcionam da mesma forma que nas montagens analógicas - ver secção "Como lidar com erros".
 
 #### Comportamento em caso de perda de ligação
 
-Após ligar o iHeater e o iHeater-link, podem iniciar simultaneamente. O módulo iHeater-link precisa de tempo para inicializar o Wi-Fi e conectar-se à fonte de comandos, portanto, nos primeiros **20 segundos** após o arranque, o firmware do iHeater **não considera a ausência de pacotes como um erro** e mostra uma luz corrida lenta (passo de 1000 ms) - "aguardando primeiro pacote".
+O firmware desliga o aquecimento quando os comandos do iHeater-link deixam de chegar e retoma o funcionamento quando voltam a chegar.
 
-Se nenhum pacote correto chegar durante estes 20 segundos, o firmware entra em `ERROR_LINK_LOST` da mesma forma que com perda de ligação no modo normal.
+Após ligar, o firmware aguarda o primeiro pacote e mostra uma luz corrida lenta (passo de 1000 ms). O aquecedor está desativado. A espera não tem limite de tempo: enquanto a ligação nunca tiver sido estabelecida, a ausência de pacotes não é considerada perda de ligação.
 
-Após o primeiro pacote ser recebido, a regra normal aplica-se: ausência de pacotes por mais de 1,5 segundos → erro.
+Após receber o primeiro pacote, aplica-se a regra: se não chegarem pacotes durante mais de **5 segundos**, a ligação é considerada perdida. Durante estes 5 segundos, o iHeater continua a funcionar segundo o último comando.
 
-Algoritmo ao disparar um erro:
+Em caso de perda de ligação:
 
-1. O firmware guarda na flash o código de erro `0x08` (`ERROR_LINK_LOST`).
-2. Reinicia o controlador.
-3. Após reinicialização, o aquecedor está desativado; durante a nova janela de 20 segundos novamente luz corrida de espera, depois - piscada lenta de todos os LEDs.
-4. Para limpar o erro, mantenha o botão MODE pressionado ao ligar, depois solte. O dispositivo voltará ao funcionamento normal.
+1. O aquecedor é desativado.
+2. O ventilador é ativado e funciona até a ligação ser restabelecida.
+3. Os LEDs mostram o "farol": os três LEDs piscam durante ~100 ms a cada 2 s.
+
+Nenhum erro é guardado na flash, o controlador não reinicia e não é necessário premir o botão MODE. Quando os pacotes voltam a chegar, o iHeater executa o comando recebido: com um valor-alvo `45..90` retoma o aquecimento; com `0` ou `10` permanece desativado.
 
 #### Botão MODE
 
@@ -239,7 +240,7 @@ O dispositivo reinicia automaticamente e apresenta o código de erro através do
 | 0x05  | Termistor do aquecedor desligado             |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](../img/ball_gifs/black_ball.gif) |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)   |
 | 0x06  | Sobreaquecimento do aquecedor                     |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif) |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](../img/ball_gifs/black_ball.gif)   |
 | 0x07  | Sobreaquecimento do ar                        |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)   |
-| 0x08  | Ligação perdida com iHeater-link (apenas montagem pulse) | 0.25 Hz | 0.25 Hz | 0.25 Hz |
+| 0x08  | Ligação perdida com iHeater-link (montagem pulse v0.5.0; a partir da v0.5.1 já não é guardado) | 0.25 Hz | 0.25 Hz | 0.25 Hz |
 | 0xFF  | Erro desconhecido                              |![LED ON](../img/ball_gifs/red_ball.gif)  | ![LED ON](../img/ball_gifs/red_ball.gif)|![LED ON](../img/ball_gifs/red_ball.gif)  |
 
 

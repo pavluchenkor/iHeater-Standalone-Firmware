@@ -122,27 +122,28 @@ iHeater 是一种紧凑且可靠的解决方案，适用于没有主动恒温室
 
 | 状态 | LED1 | LED2 | LED3 |
 |-----------|------|------|------|
-| 等待启动后第一个数据包（最多 20 秒） | LED1 → LED2 → LED3 循环，步长 1000 ms | | |
+| 等待启动后第一个数据包 | LED1 → LED2 → LED3 循环，步长 1000 ms | | |
 | 连接正常，加热关闭 | 常亮（心跳"连接活动"） | 熄灭 | 每收到一个数据包闪烁 ~80 ms |
-| 连接正常，加热启用 | LED1 → LED2 → LED3 循环，步长 500 ms | | |
-| 连接丢失（首次连接后超过 1.5 秒无数据包） | 三个 LED 同步闪烁；设备使用错误代码 `0x08`（`ERROR_LINK_LOST`）重启。加热器已关闭。 | | |
+| 连接正常，加热启用 | LED1 → LED2 → LED3 循环，步长 200 ms | | |
+| 连接丢失（首次连接后超过 5 秒无数据包） | “信标”：三个 LED 每 2 秒同时闪亮约 100 ms。加热器关闭，风扇开启。 | | |
 
 标准错误（过热、温度传感器断开、加热器无响应）的工作方式与模拟版本相同 —— 见"发生错误时"部分。
 
 #### 连接丢失时的行为
 
-启动 iHeater 和 iHeater-link 电源后，两者可能同时启动。iHeater-link 模块需要时间初始化 Wi-Fi 并连接到命令源，因此在启动后的前 **20 秒内**，iHeater 固件 **不将缺失数据包视为错误**，并显示缓慢循环（步长 1000 ms）—— "等待第一个数据包"。
+当来自 iHeater-link 的命令停止到达时，固件关闭加热；命令再次到达时，恢复工作。
 
-如果在这 20 秒内没有收到任何有效数据包 —— 固件进入 `ERROR_LINK_LOST`，就像在正常模式下连接丢失一样。
+通电后，固件等待第一个数据包，并显示缓慢循环（步长 1000 ms）。加热器关闭。等待没有时间限制：只要连接从未建立过，缺少数据包就不视为连接丢失。
 
-接收到第一个数据包后，适用常规规则：数据包丢失超过 1.5 秒 → 错误。
+收到第一个数据包后，适用以下规则：如果超过 **5 秒** 没有数据包，则认为连接丢失。在这 5 秒内，iHeater 按最后一条命令继续工作。
 
-错误触发时的算法：
+连接丢失时：
 
-1. 固件在闪存中保存错误代码 `0x08`（`ERROR_LINK_LOST`）。
-2. 重启控制器。
-3. 重启后，加热器已关闭；在新的 20 秒窗口内再次出现等待循环，之后是所有 LED 的缓慢闪烁。
-4. 要重置错误，请在通电时按住 MODE 按钮，然后释放。设备将恢复到正常操作。
+1. 加热器关闭。
+2. 风扇开启，并一直运行到连接恢复。
+3. LED 显示“信标”：三个 LED 每 2 秒闪亮约 100 ms。
+
+错误不会保存到闪存，控制器不会重启，也不需要按 MODE 按钮。数据包再次到达后，iHeater 执行收到的命令：设定值为 `45..90` 时恢复加热，为 `0` 或 `10` 时保持关闭。
 
 #### MODE 按钮
 
@@ -239,7 +240,7 @@ iHeater 是一种紧凑且可靠的解决方案，适用于没有主动恒温室
 | 0x05  | 加热器温度传感器断开             |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](../img/ball_gifs/black_ball.gif) |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)   |
 | 0x06  | 加热器过热                     |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif) |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](../img/ball_gifs/black_ball.gif)   |
 | 0x07  | 空气过热                        |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)   |
-| 0x08  | 与 iHeater-link 连接丢失（仅限 pulse 版本） | 0.25 Hz | 0.25 Hz | 0.25 Hz |
+| 0x08  | 与 iHeater-link 连接丢失（pulse 版本 v0.5.0；自 v0.5.1 起不再保存） | 0.25 Hz | 0.25 Hz | 0.25 Hz |
 | 0xFF  | 未知错误                              |![LED ON](../img/ball_gifs/red_ball.gif)  | ![LED ON](../img/ball_gifs/red_ball.gif)|![LED ON](../img/ball_gifs/red_ball.gif)  |
 
 

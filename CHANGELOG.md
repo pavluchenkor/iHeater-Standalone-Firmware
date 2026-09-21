@@ -1,57 +1,47 @@
-Changelog
+# Changelog
 
-**v0.5.0**
-- New build `iheater_rev1_1_pulse` for pairing with the ESP-based iHeater-link module
-- Chamber setpoint is received over a single GPIO line as a pulse train on the TH2 connector (PB1, EXTI); code equals air temperature in °C
-- Accepted command range: `0` = off, `10` = off (agreed with iHeater-link), `45..90` = heating setpoint in °C, other values ignored
-- Heater and air thermistors stay on their normal connectors (TH0/PA3 and TH1/PA0); trigger feature is disabled in the pulse build
-- New dedicated mode `MODE_PULSE` with its own LED pattern (chasing light LED1→LED2→LED3 at 500 ms step); in `MODE_0` LED1 stays solid as a link-alive heartbeat and LED3 flashes ~80 ms on every accepted frame
-- New fault `ERROR_LINK_LOST` (0x08): all three LEDs blink at 0.25 Hz when no pulse frames arrive within 1.5 s; device resets with heater off
-- 20-second boot grace window on the pulse build: link-lost is suppressed while waiting for the very first frame from iHeater-link (slow chasing light, 1000 ms step). After 20 s without a frame the fault fires as usual.
-- In the pulse build the MODE button no longer cycles modes or triggers calibration — it only clears a persisted error at startup
-- Standard protections (overheat, open thermistor, heater-no-response) remain active in the pulse build
-- Existing analog builds (`iheater_rev1_0`, `iheater_rev1_1`, `idryer_rev1_1`) are unchanged except for the version string
+Этот файл ведётся на русском языке и фиксирует заметные изменения в автономной прошивке iHeater.
 
-**v0.3.0**
-- Trigger temperature calibration mode via button
-- Long press in MODE_0 enters calibration
-- Step 1: set TRIGGER_ON_TEMP (1 LED blinks 10Hz)
-- Step 2: set TRIGGER_OFF_TEMP (2 LEDs blink 10Hz)
-- Success indication: all 3 LEDs blink 3 times
-- Short press cancels calibration and rolls back changes
-- Settings saved to NVS (flash memory)
+## Типы изменений
 
-**v0.2.2**
- - Fixed temperature data source
- - comments translated to English
+- **Добавлено** — для новых функций.
+- **Изменено** — для изменений в существующей функциональности.
+- **Устарело** — для функций, которые скоро будут удалены.
+- **Удалено** — для удалённых на данный момент функций.
+- **Исправлено** — для любых исправлений багов.
+- **Безопасность** — на случай уязвимостей.
 
-**v0.2.1**
-- Thermistor Steinhart-Hart coefficients have been adapted from Klipper's configuration
+## [0.5.1]
 
-**v0.2.0**
- - Selectable automatic activation temperature
- - Selectable automatic deactivation temperature
- - Selectable heating mode for automatic activation
+### Изменено
 
-**v0.1.3**
- - Correction of PID controller
- - Fix ERROR_OVERHEAT_HEATER error
- - General fixes to improve stability
- - Air temperature fluctuations +-0.5C
+- **Работа после потери связи с iHeater Link восстанавливается сама.** Если команды не приходят 5 секунд, нагрев снимается, вентилятор включается, а светодиоды показывают «маяк»: все три вспыхивают на ~100 мс раз в 2 секунды. Когда команды приходят снова, нагреватель выполняет их без перезагрузки и нажатия кнопки. Раньше ошибку вызывали полторы секунды без команд, и сбросить её можно было только кнопкой MODE.
+- **Ожидание первой связи после включения не ограничено по времени.** Пока связь не установлена, нагрев выключен, а светодиоды показывают медленный бегущий огонёк. Окно в 20 секунд убрано.
+- **Бегущий огонёк при нагреве ускорен:** шаг 200 мс вместо 500 мс. Так его не спутать с ожиданием связи.
 
+### Исправлено
 
-**v0.1.0 - Initial Public Draft**
+- **Ложная потеря связи.** Если импульс приходил в момент смены отсчёта миллисекунд, прошивка могла посчитать связь потерянной.
 
-- Basic standalone firmware structure for iHeater
+## [3.0.0]
 
-- Temperature mode control
+### Добавлено
 
-- Temperature mode indication using 3 LEDs
+- **Сборка для работы с iHeater Link.** Уставка камеры приходит от модуля связи по одному сигнальному проводу, а не задаётся кнопкой. Так нагреватель управляется от принтера через портал, Home Assistant, Moonraker или Bambu Lab.
+- **Контроль связи.** Если команды от модуля не приходят полторы секунды, нагрев снимается и устройство переходит в ошибку: оставлять печку без управления недопустимо. При включении даётся 20 секунд на установление связи.
+- **Автозапуск по температуре стола.** Термистор на столе принтера включает нагрев в начале печати и выключает по остыванию. Пороги и запускаемый режим задаются в конфигурации. Доступно на плате ревизии 1.1.
+- **Калибровка порогов автозапуска с кнопки,** без пересборки прошивки. Значения сохраняются в память.
 
-- Dual thermistor support (air + heater)
+### Изменено
 
-- Basic error detection and reset logic
+- В сборке для iHeater Link кнопка MODE не переключает режимы: она только сбрасывает сохранённую ошибку при включении.
+- Коэффициенты термисторов приведены к значениям из конфигурации Klipper.
 
-- Default config: Generic 3950 thermistor
+### Исправлено
 
-- The firmware is ready for initial testing
+- Устранены колебания температуры воздуха, точность поддержания около ±0,5 °C.
+- Исправлена ложная ошибка перегрева нагревателя.
+
+## [0.x]
+
+Серия пробных сборок. Направление завершено, наработки перенесены в 3.0.0.

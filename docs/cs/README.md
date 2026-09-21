@@ -122,27 +122,28 @@ Minimum `45 °C` je nastaveno v `config.h` makrem `PULSE_MIN_TARGET`. Maximum je
 
 | Stav | LED1 | LED2 | LED3 |
 |-----------|------|------|------|
-| Čekání na první balíček po zapnutí (do 20 s) | běžící světla LED1 → LED2 → LED3 s krokem 1000 ms | | |
+| Čekání na první balíček po zapnutí | běžící světla LED1 → LED2 → LED3 s krokem 1000 ms | | |
 | Spojení OK, ohřev vypnut | svítí nepřetržitě (heartbeat "spojení žije") | zhasnut | krátká záře ~80 ms na každý přijatý balíček |
-| Spojení OK, ohřev zapnut | běžící světla LED1 → LED2 → LED3 s krokem 500 ms | | |
-| Spojení ztraceno (více než 1,5 s bez balíčku po prvním připojení) | Všechny tři blikají synchronně; zařízení se restartuje s kódem chyby `0x08` (`ERROR_LINK_LOST`). Topidlo je vypnuto. | | |
+| Spojení OK, ohřev zapnut | běžící světla LED1 → LED2 → LED3 s krokem 200 ms | | |
+| Spojení ztraceno (více než 5 s bez balíčku po prvním připojení) | „Maják“: všechny tři LED současně bliknou na ~100 ms každé 2 s. Topidlo je vypnuto, ventilátor je zapnut. | | |
 
 Standardní chyby (přehřátí, přerušení termistoru, topidlo neodpovídá) fungují stejně jako v analogových sestaven - viz sekce "Co dělat v případě chyby".
 
 #### Chování při ztrátě spojení
 
-Po zapnutí iHeater a iHeater-link se mohou spustit současně. Modulu iHeater-link trvá čas na inicializaci Wi-Fi a připojení ke zdroji příkazů, proto v prvních **20 sekundách** po spuštění firmware iHeater **nepovažuje chybějící balíčky za chybu** a zobrazuje pomalá běžící světla (krok 1000 ms) - "čekám na první balíček".
+Firmware vypne ohřev, když přestanou přicházet příkazy z iHeater-link, a obnoví provoz, jakmile znovu začnou přicházet.
 
-Pokud v těchto 20 sekundách nepřijde žádný správný balíček - firmware jde do `ERROR_LINK_LOST` stejně jako při ztrátě spojení v normálním režimu.
+Po zapnutí firmware čeká na první balíček a zobrazuje pomalá běžící světla (krok 1000 ms). Topidlo je vypnuto. Čekání není časově omezeno: dokud spojení nebylo ani jednou navázáno, chybějící balíčky se nepovažují za ztrátu spojení.
 
-Jakmile je přijat první balíček, platí obvyklé pravidlo: chybějící balíčky déle než 1,5 sekundy → chyba.
+Po přijetí prvního balíčku platí pravidlo: pokud balíčky nepřicházejí déle než **5 sekund**, spojení se považuje za ztracené. Během těchto 5 sekund iHeater pracuje podle posledního příkazu.
 
-Algoritmus při spuštění chyby:
+Při ztrátě spojení:
 
-1. Firmware uloží do flash kód chyby `0x08` (`ERROR_LINK_LOST`).
-2. Restartuje ovladač.
-3. Po restartování je topidlo vypnuto; během nového 20sekundového okna opět běžící světla čekání, dále - pomalé blikání všech LED.
-4. Chcete-li vymazat chybu, držte tlačítko MODE při aplikaci napájení a poté jej uvolněte. Zařízení se vrátí k normálnímu provozu.
+1. Topidlo se vypne.
+2. Ventilátor se zapne a běží až do obnovení spojení.
+3. LED zobrazují „maják“: všechny tři LED bliknou na ~100 ms každé 2 s.
+
+Do flash se neukládá žádná chyba, ovladač se nerestartuje a tlačítko MODE není třeba stisknout. Jakmile balíčky znovu přicházejí, iHeater provede přijatý příkaz: při žádané hodnotě `45..90` obnoví ohřev, při `0` nebo `10` zůstane vypnutý.
 
 #### Tlačítko MODE
 
@@ -239,7 +240,7 @@ Zařízení se automaticky restartuje a zobrazí kód chyby pomocí LED diod, ve
 | 0x05  | Termistor topidla odpojen             |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](../img/ball_gifs/black_ball.gif) |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)   |
 | 0x06  | Topidlo - přeteplota                     |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif) |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](../img/ball_gifs/black_ball.gif)   |
 | 0x07  | Vzduch - přeteplota                        |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)   |
-| 0x08  | Ztraceno spojení s iHeater-link (pouze pulse-sestava) | 0.25 Hz | 0.25 Hz | 0.25 Hz |
+| 0x08  | Ztraceno spojení s iHeater-link (pulse-sestava v0.5.0; od v0.5.1 se neukládá) | 0.25 Hz | 0.25 Hz | 0.25 Hz |
 | 0xFF  | Neznámá chyba                              |![LED ON](../img/ball_gifs/red_ball.gif)  | ![LED ON](../img/ball_gifs/red_ball.gif)|![LED ON](../img/ball_gifs/red_ball.gif)  |
 
 

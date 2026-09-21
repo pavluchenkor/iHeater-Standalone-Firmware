@@ -1,231 +1,143 @@
-[![Release](https://img.shields.io/github/v/release/pavluchenkor/iHeater-Standalone-Firmware?include_prereleases&label=latest)](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases)
-[![Docs](https://img.shields.io/badge/docs-view--online-green?logo=readthedocs)](https://docs.idryer.org/iHeater/)
-[![Telegram](https://img.shields.io/badge/Telegram-Join%20Chat-blue?logo=telegram)](https://t.me/iDryer)
+<div align="center">
 
+<img src="docs/img/iDryer_logo_small.png" width="220" alt="iDryer">
 
-# Standalone iHeater Firmware
+# iHeater Standalone Firmware
 
-iHeater is a compact and affordable solution for 3D printers without an active heated chamber or with limited connection options to the mainboard. It's especially useful for printers with proprietary boards lacking free ports for fans, heaters, or thermistors. iHeater solves this with a simple and universal approach.
+**Firmware for the iHeater heater. Press the button, it heats.**
 
-It can operate standalone with its own firmware or be integrated with Klipper over USB.
+[![Documentation](https://img.shields.io/badge/docs-idryer.org-e7352c)](https://docs.idryer.org/en/projects/iheater/standalone/) [![Telegram](https://img.shields.io/badge/Telegram-iDryer-2ca5e0)](https://t.me/iDryer) [![Discord](https://img.shields.io/badge/Discord-join-5865f2)](https://discord.gg/jGce5eeHHz) [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 
-![iHeater](docs/img/iHeater_200.png)
+<img src="docs/img/iHeater_200.png" width="480" alt="iHeater">
 
----
-
-## About the Firmware
-
-**iHeater** is firmware for a standalone device that manages the temperature of a 3D printer's heated chamber.
+</div>
 
 ---
 
-## Purpose
+## What this is
 
-The device ensures heating and stable temperature maintenance inside the printer's chamber, which is critical for printing ABS, ASA, and other shrinkage-sensitive and adhesion-sensitive filaments.
+Firmware for the [iHeater](https://github.com/pavluchenkor/iHeater) heater. It turns the heater into a standalone device: press the button and it heats, press again for a different temperature, hold to switch it off.
 
----
+Three LEDs show what is going on. Nothing else is required to run it.
 
-## How to Configure the Firmware
+> **The full description is in the [firmware documentation](https://docs.idryer.org/en/projects/iheater/standalone/).** It covers the mode table with temperatures, the LED blink patterns, error codes, every configuration parameter and the flashing procedure.
 
-### File `config.h`
+## What it solves
 
-This file contains all configurable parameters:
+An actively heated chamber is required for ABS, ASA and other filaments sensitive to warping and adhesion. The heater has to reach temperature and hold it for the whole print.
 
-| Parameter                                 | Description                                                                                   |
-| ----------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `SELECTED_THERMISTOR_TYPE`                | Select thermistor type (0-5, see below)                                                       |
-| `MODE_TEMP_0`-`MODE_TEMP_7`                           | Setpoint temperatures for each mode. Can be any float value, e.g. `MODE_TEMP_4 67.5`                |
-| `MAX_TEMP`, `MIN_TEMP`                    | Allowed temperature range for the heater                                                      |
-| `MAX_AIR_TEMP`, `MIN_AIR_TEMP`            | Allowed temperature range for air                                                             |
-| `HEATER_MIN_PWM`                          | Minimum PWM required to start heater response monitoring                                      |
-| `HEATER_RESPONSE_TIMEOUT_MS`              | Timeout for detecting heater response (default 5 seconds)                                     |
-| `AIR_TARGET_TIMEOUT_MS`                   | Maximum time allowed to reach air target temperature (default 10 minutes)                    |
-| `TIMER_CLOCK`, `PWM_FREQUENCY`, `PWM_STEPS` | PWM configuration (frequency and resolution)                                                |
+With this firmware it does that on its own, independently of the printer. Pick a temperature and it runs.
 
-### Thermistors
+## Autostart from bed temperature
 
-Selected using `SELECTED_THERMISTOR_TYPE`:
+The main feature, and the main reason to choose this firmware.
 
-| ID | Type                          | Notes                              |
-|----|-------------------------------|-------------------------------------|
-| 0  | ATC Semitec 104GT-2           | Standard used by E3D                |
-| 1  | ATC Semitec 104NT-4-R025H42G  | 104GT alternative                   |
-| 2  | EPCOS 100K B57560G104F        | Widely used                         |
-| 3  | Generic 3950                  | **Default**, common Chinese type    |
-| 4  | SliceEngineering 450          | High-temp support                   |
-| 5  | TDK NTCG104LH104JT1           | Medical-grade accuracy              |
+Put a thermistor on the printer bed and connect it to input **TH2**. From there the heater runs itself: the bed starts heating, so a print has started and the chamber comes up to temperature. The bed cools down, the print is over and heating stops.
 
-### Temperature Modes and LEDs
+The switch-on and switch-off temperatures, and the mode that gets started, are set in the configuration. By default heating starts at 75 °C on the bed and stops at 80 °C.
 
-Each mode sets a target temperature and is displayed via binary LEDs:
+> Autostart is available on board revision **1.1**, which has the input for the third thermistor.
 
-When entering the mode, the LEDs blink, once the mode is activated, they remain constantly lit.
+→ [How to set up the trigger](https://docs.idryer.org/en/projects/iheater/standalone/trigger/)
 
-| Mode   | Temperature | LED3 | LED2 | LED1 |
-|--------|-------------|------|------|------|
-| MODE_TEMP_0  | 0.0°C       |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |
-| MODE_TEMP_1  | 55.0°C      |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |
-| MODE_TEMP_2  | 60.0°C      |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |
-| MODE_TEMP_3  | 65.0°C      |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |
-| MODE_TEMP_4  | 70.0°C      |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |
-| MODE_TEMP_5  | 75.0°C      |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |
-| MODE_TEMP_6  | 80.0°C      |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |
-| MODE_TEMP_7  | 85.0°C      |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |![LED 1Hz](docs/img/ball_gifs/blinking_ball.gif)   |
+## Build for iHeater Link
 
+A separate firmware variant for anyone who needs the heater controlled from outside.
 
----
-### Automatic enabling and disabling r1.1
+In it the temperature does not come from the button but as a digital command on the input. The setpoint is supplied by [iHeater Link](https://github.com/pavluchenkor/iHeater-Link): it reads the setpoint from the printer and passes it to the heater. That adds the portal, the mobile app and print-driven automation.
 
-Macros
+If the link is lost for longer than 5 seconds, the heater removes heating and turns on the fan. An unattended heater left without control is not acceptable. When commands arrive again, operation resumes on its own, without a reset or a button press.
 
-```
-#define TRIGGER_ON_TEMP  45.0f
-#define TRIGGER_OFF_TEMP 80.0f
-#define TRIGGER_MODE MODE_2
-```
+## Control
 
-These parameters define the activation and deactivation temperatures for the heater, as well as the mode to be enabled upon activation.
+There is one control: the **MODE** button.
 
-Assuming the trigger thermistor is located near the heated bed.
-With the current settings, the chamber heater will turn on when the bed temperature reaches 45°C and will turn off when the bed temperature drops below 80°C. These parameters are suitable for most filaments that require an actively heated chamber and do not cause logical conflicts during operation.
+- **Short press** switches between modes.
+- **Long press** switches the heater off.
 
-It is also possible to select the mode that will be activated when the trigger is engaged. For example, TRIGGER_MODE MODE_2 is currently selected, which means that MODE_TEMP_2 will be activated, setting the chamber temperature to 60.0°C.
+Three LEDs show the selected mode. Blinking means heating is in progress and the target has not been reached. Steady means the chamber is at temperature.
 
+Eight modes, from off up to 85 °C. The values are not hard-wired: any mode can be given its own temperature in the configuration, 67.5 °C included.
 
----
+→ [Mode table and indication reference](https://docs.idryer.org/en/projects/iheater/standalone/)
 
-## How to Flash the Firmware
+## Thermistors
 
-### Download
+Six types are supported, including ATC Semitec 104GT-2, EPCOS 100K, Generic 3950, SliceEngineering 450 and TDK. The type is selected in the configuration. Prebuilt binaries use Generic 3950, the most common one.
 
-[Скачайте прошивку со страницы релизов](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases)
+## Protection
 
+The firmware watches more than overheating. It checks that the heater actually responds to the applied power, and that the chamber reaches the target temperature within a reasonable time. If it does not, operation stops.
 
-### Using Precompiled Binary
+The temperature limits for the heater and for the air are set separately and cap everything else.
 
-[Download the firmware from the releases page](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases)
+The same three LEDs show what happened: thermistor open circuit or short, overheating, heater not responding. Each case has its own pattern. To clear an error, hold the MODE button while power is applied.
 
+→ [Error codes and what they mean](https://docs.idryer.org/en/projects/iheater/standalone/)
 
-This firmware is pre-configured with the temperature modes from MODE_TEMP_0 to MODE_TEMP_7 (as described above) and designed to work with a Generic 3950 thermistor (type 3 in `config.h`).
+> **This is an electric heating appliance.** Never leave the device running unattended.
 
-### Using DFU Mode (USB)
+## Flashing the board
 
-=== "r1"
+Prebuilt binaries are on the [releases page](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases). They are enough if the standard modes and the Generic 3950 thermistor suit you.
 
-    1. Set the BOOT0 jumper
-    2. Connect USB, the device will be recognized as DFU 3.1 Upload the firmware using STM32CubeProgrammer:
+Flashing is done over USB in DFU mode: on revision 1 close the BOOT0 jumper, on revision 1.1 hold the BOOT button. Then use STM32CubeProgrammer or `dfu-util`.
 
-    3.1.1 Specify the path to the `.bin` firmware file (e.g.: `Firmware/iHeater_v1.2.3.bin`) 3.1.2 Set the download address: `0x08000000`
+Your own temperatures, your own thermistor, your own trigger thresholds are edited in `config.h` and require a rebuild.
 
-    3.1.3 Click "Start Programming"
+→ [Build and flashing](https://docs.idryer.org/en/projects/iheater/standalone/assembly/)
 
-    or
+## Place in the ecosystem
 
-    3.2 Upload the firmware via command line:
+| Layer | What it does | Repository |
+|---|---|---|
+| Heater | Board, mechanics, schematics | [iHeater](https://github.com/pavluchenkor/iHeater) |
+| Standalone firmware | Operation without a host — **this repository** | iHeater-Standalone-Firmware |
+| Link | Wi-Fi, portal, print-driven automation | [iHeater Link](https://github.com/pavluchenkor/iHeater-Link) |
+| Cloud | Portal, app, integrations | [portal.idryer.org](https://portal.idryer.org/) |
 
-    ```bash
-    dfu-util -a 0 -s 0x08000000 -D Firmware/iHeater_vX.Y.Z.bin
-    ```
+## What you need
 
-    4. Remove the jumper and power cycle the device
+| Component | Qty | Note | Where to get it |
+|---|---|---|---|
+| iHeater board | 1 | autostart requires revision 1.1 | [store.idryer.org](https://store.idryer.org/) |
+| NTC 100K thermistor | 1 | on the printer bed, autostart only | — |
+| USB cable | 1 | for flashing, any cable works | — |
 
-=== "r1.1"
+## Status
 
-    1. Press and hold the BOOT button
-    2. Connect USB, the device will be recognized as DFU 
-    3. Upload the firmware using STM32CubeProgrammer:
-    
-        3.1.1 Specify the path to the `.bin` firmware file (e.g.: `Firmware/iHeater_v1.2.3.bin`)
+Working firmware, prebuilt binaries on the [releases page](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases). Two builds: button-controlled and for iHeater Link.
 
-        3.1.2 Set the download address: `0x08000000`
+## What is in the repository
 
-        3.1.3 Click "Start Programming"
+| Path | What it is |
+|---|---|
+| `Core/` | Firmware logic: modes, control loop, trigger, indication |
+| `Lib/` | Thermistors, PID, filtering |
+| `Drivers/` | HAL and CMSIS from STMicroelectronics |
+| `Firmware/` | Built binaries |
+| `boards/` | Board revision definitions |
 
-        or
-
-        3.2 Upload the firmware via command line:
-
-        ```bash
-        dfu-util -a 0 -s 0x08000000 -D Firmware/iHeater_vX.Y.Z.bin
-        ```
-
-    4. Power cycle the device
-
-
----
-
-## How to Use
-
-=== "r1"
-
-    * **Short press** of the MODE button - switches modes (0-7)
-    * **Long press (2+ sec)** - resets the mode to 0 (OFF)
-    * **LED indicators** display the current mode according to the table above
-    * **Flashing LEDs** - mode is active but target temperature not yet reached
-    * **Solid light** - target temperature reached
-
-=== "r1.1"
-
-    !!! note "Revision Differences"
-
-        revision r1.1 features a trigger port for automatic chamber heating control. When a thermistor is connected to the trigger port, heating will turn on and off according to the temperatures specified in config.h, by default 45 and 80 for heating activation and deactivation.
-
-
-    * **Short press** of the MODE button - switches modes (0-7)
-    * **Long press (2+ sec)** - resets the mode to 0 (OFF)
-    * **LED indicators** display the current mode according to the table above
-    * **Flashing LEDs** - mode is active but target temperature not yet reached
-    * **Solid light** - target temperature reached
-
----
-
-## Error Handling
-
-The device auto-resets and shows an error code using LED indicators. The fan will be switched on at the same time.
-
-| Code  | Description                               | LED3 | LED2 | LED1  |
-|-------|-------------------------------------------|------|------|-------|
-| 0x01  | Air failed to reach target in time        |![LED OFF](docs/img/ball_gifs/black_ball.gif)  |![LED OFF](docs/img/ball_gifs/black_ball.gif) |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif)  |
-| 0x02  | Heater not responding                     |![LED OFF](docs/img/ball_gifs/black_ball.gif) |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](docs/img/ball_gifs/black_ball.gif)  |
-| 0x03  | Manual shutdown (unused)                  |![LED OFF](docs/img/ball_gifs/black_ball.gif)  |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif)  |
-| 0x04  | Air thermistor disconnected                |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif) |![LED OFF](docs/img/ball_gifs/black_ball.gif) |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |
-| 0x05  | Heater thermistor disconnected             |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](docs/img/ball_gifs/black_ball.gif) |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif)   |
-| 0x06  | Heater overtemperature                     |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif) |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](docs/img/ball_gifs/black_ball.gif)   |
-| 0x07  | Air overtemperature                        |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](docs/img/ball_gifs/blinking_ball_10hz.gif)   |
-| 0xFF  | Unknown error                              |![LED ON](docs/img/ball_gifs/red_ball.gif)  | ![LED ON](docs/img/ball_gifs/red_ball.gif)|![LED ON](docs/img/ball_gifs/red_ball.gif)  |
-
-
-### Resetting an Error
-
-Hold the MODE button during startup until the LEDs change. The stored error will be cleared from flash memory, and the device will resume normal operation.
-
----
-
-## Fine Tuning
-
-If there is confirmation that the thermocouple readings deviate from the actual temperature, the fine tuning function can be used. For this purpose, it is necessary to measure the resistance of the corresponding resistors and record these values instead of the default ones.
-
-
-```C++ title="Actual resistance of the pull-up resistors"
-#define PULLUP_TH0 4700.0f
-#define PULLUP_TH1 4700.0f
-#define PULLUP_TH2 4700.0f
-```
-
----
-
-This software is licensed under the Apache License 2.0. Commercial use is permitted. See the [LICENSE](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/blob/main/LICENSE) file for details.
 ## License
 
-Licensed under the Apache License, Version 2.0 — see [LICENSE](LICENSE) and
-[NOTICE](NOTICE).
+Code is under the [Apache License 2.0](LICENSE), [NOTICE](NOTICE).
 
-You may use, modify, distribute and sell this software, including for
-commercial purposes.
+The iDryer name is not covered by the license, see [TRADEMARKS.md](https://github.com/pavluchenkor/idryer-core/blob/main/TRADEMARKS.md).
 
-The license does not grant rights to the iDryer name. Community projects are
-welcome and the naming policy is permissive — see
-[TRADEMARKS.md](https://github.com/pavluchenkor/idryer-core/blob/main/TRADEMARKS.md).
+The hardware design is licensed separately.
 
-Hardware design and mechanical documentation are licensed separately and are
-not covered by this license.
+## Help
+
+- [Telegram](https://t.me/iDryer)
+- [Discord](https://discord.gg/jGce5eeHHz)
+- [Documentation](https://docs.idryer.org/en/projects/iheater/standalone/)
+
+Guides and teardowns on the channel: [YouTube](https://www.youtube.com/@iDryerProject) · [Rutube](https://rutube.ru/channel/34401569/)
+
+## Contributing
+
+If you have tuned the trigger thresholds for your printer, added a thermistor or found a bug, open an issue or send a pull request.
+
+## Next
+
+[Download a prebuilt firmware image](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases) and flash it over USB. Nothing needs to be built.

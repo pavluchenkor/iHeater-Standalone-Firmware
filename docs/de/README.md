@@ -121,27 +121,28 @@ Das Minimum von `45 °C` wird durch das Makro `PULSE_MIN_TARGET` in `config.h` g
 
 | Status | LED1 | LED2 | LED3 |
 |-----------|------|------|------|
-| Warten auf erstes Paket nach dem Einschalten (bis 20 s) | laufendes Licht LED1 → LED2 → LED3 in Schritten von 1000 ms | | |
+| Warten auf erstes Paket nach dem Einschalten | laufendes Licht LED1 → LED2 → LED3 in Schritten von 1000 ms | | |
 | Verbindung OK, Heizung ausgeschaltet | leuchtet konstant (Heartbeat "Verbindung aktiv") | ausgeschaltet | kurzer Blitz ~80 ms bei jedem empfangenen Paket |
-| Verbindung OK, Heizung eingeschaltet | laufendes Licht LED1 → LED2 → LED3 in Schritten von 500 ms | | |
-| Verbindung verloren (mehr als 1,5 s ohne Paket nach erster Verbindung) | Alle drei blinken synchron; Gerät startet mit dem Fehlercode `0x08` (`ERROR_LINK_LOST`) neu. Heizer ausgeschaltet. | | |
+| Verbindung OK, Heizung eingeschaltet | laufendes Licht LED1 → LED2 → LED3 in Schritten von 200 ms | | |
+| Verbindung verloren (mehr als 5 s ohne Paket nach erster Verbindung) | „Leuchtfeuer“: alle drei LEDs blitzen alle 2 s gleichzeitig für ~100 ms auf. Heizer ausgeschaltet, Lüfter eingeschaltet. | | |
 
 Standardfehler (Übertemperatur, Thermistor-Unterbrechung, Heizer reagiert nicht) funktionieren genauso wie in analogen Builds – siehe Abschnitt „Was tun im Fehlerfall".
 
 #### Verhalten bei Verbindungsverlust
 
-Nach dem Einschalten des iHeater und iHeater-link können beide gleichzeitig starten. Das iHeater-link Modul benötigt Zeit zur Wi-Fi-Initialisierung und zum Verbinden mit der Befehlsquelle. Daher berücksichtigt die Firmware in den ersten **20 Sekunden** nach dem Start **fehlende Pakete nicht als Fehler** und zeigt ein langsames laufendes Licht (Schritte von 1000 ms) – „Warte auf erstes Paket".
+Die Firmware schaltet die Heizung ab, wenn keine Befehle von iHeater-link mehr ankommen, und nimmt den Betrieb wieder auf, sobald sie wieder eintreffen.
 
-Wenn während dieser 20 Sekunden kein einziges korrektes Paket ankommt, geht die Firmware in `ERROR_LINK_LOST` genauso wie beim Verbindungsabbruch im Normalmodus.
+Nach dem Einschalten wartet die Firmware auf das erste Paket und zeigt ein langsames laufendes Licht (Schritte von 1000 ms). Der Heizer ist ausgeschaltet. Das Warten ist zeitlich nicht begrenzt: Solange noch nie eine Verbindung bestand, gilt das Ausbleiben von Paketen nicht als Verbindungsverlust.
 
-Nachdem das erste Paket empfangen wurde, gilt die übliche Regel: Fehlende Pakete länger als 1,5 Sekunden → Fehler.
+Nachdem das erste Paket empfangen wurde, gilt die Regel: Kommen länger als **5 Sekunden** keine Pakete an, gilt die Verbindung als verloren. Während dieser 5 Sekunden arbeitet iHeater nach dem letzten Befehl weiter.
 
-Algorithmus beim Fehler:
+Bei Verbindungsverlust:
 
-1. Die Firmware speichert den Fehlercode `0x08` (`ERROR_LINK_LOST`) im Flash.
-2. Startet den Controller neu.
-3. Nach dem Neustart ist der Heizer ausgeschaltet; während des neuen 20-Sekunden-Fensters wieder laufendes Licht zum Warten, danach – langsames Blinken aller LEDs.
-4. Zum Zurücksetzen des Fehlers halten Sie die MODE-Taste gedrückt, während Sie das Gerät einschalten, und lassen Sie sie los. Das Gerät kehrt zur Normalbetrieb zurück.
+1. Der Heizer wird ausgeschaltet.
+2. Der Lüfter wird eingeschaltet und läuft, bis die Verbindung wiederhergestellt ist.
+3. Die LEDs zeigen das „Leuchtfeuer“: alle drei LEDs blitzen alle 2 s für ~100 ms auf.
+
+Es wird kein Fehler im Flash gespeichert, der Controller startet nicht neu, und die MODE-Taste muss nicht gedrückt werden. Sobald wieder Pakete ankommen, führt iHeater den empfangenen Befehl aus: Bei einem Sollwert `45..90` wird das Heizen fortgesetzt, bei `0` oder `10` bleibt die Heizung aus.
 
 #### MODE-Taste
 
@@ -239,7 +240,7 @@ Das Gerät startet automatisch neu und zeigt den Fehlercode mit LEDs an. Der Lü
 | 0x05  | Heizer-Thermistor getrennt             |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](../img/ball_gifs/black_ball.gif) |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)   |
 | 0x06  | Heizer-Übertemperatur                     |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif) |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](../img/ball_gifs/black_ball.gif)   |
 | 0x07  | Luft-Übertemperatur                        |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)   |
-| 0x08  | Verbindung zu iHeater-link verloren (nur Pulse-Build) | 0.25 Hz | 0.25 Hz | 0.25 Hz |
+| 0x08  | Verbindung zu iHeater-link verloren (Pulse-Build v0.5.0; ab v0.5.1 nicht mehr gespeichert) | 0.25 Hz | 0.25 Hz | 0.25 Hz |
 | 0xFF  | Unbekannter Fehler                              |![LED ON](../img/ball_gifs/red_ball.gif)  | ![LED ON](../img/ball_gifs/red_ball.gif)|![LED ON](../img/ball_gifs/red_ball.gif)  |
 
 

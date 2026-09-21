@@ -123,27 +123,28 @@ The minimum `45 °C` is defined in `config.h` as `PULSE_MIN_TARGET`. The maximum
 
 | State | LED1 | LED2 | LED3 |
 |-------|------|------|------|
-| Waiting for the first frame after boot (up to 20 s) | chasing light LED1 → LED2 → LED3 with a 1000 ms step | | |
+| Waiting for the first frame after boot | chasing light LED1 → LED2 → LED3 with a 1000 ms step | | |
 | Link OK, heating off | solid on (link-alive heartbeat) | off | short ~80 ms flash on every accepted frame |
-| Link OK, heating on  | chasing light LED1 → LED2 → LED3 with a 500 ms step | | |
-| Link lost (>1.5 s with no frame after the first one) | All three blink together; the device resets with error code `0x08` (`ERROR_LINK_LOST`). The heater stays off. | | |
+| Link OK, heating on  | chasing light LED1 → LED2 → LED3 with a 200 ms step | | |
+| Link lost (>5 s with no frame after the first one) | "Beacon": all three LEDs flash together for ~100 ms every 2 s. The heater is off, the fan is on. | | |
 
 Standard faults (overheat, open thermistor, heater-no-response) work exactly as in analog builds — see "Error Handling".
 
 #### Link-lost behaviour
 
-iHeater and iHeater-link can be powered up simultaneously. iHeater-link needs time to bring up Wi-Fi and connect to its command source, so for the first **20 seconds** after boot the firmware does **not** treat the absence of frames as a fault and shows a slow chasing light (1000 ms step) — "waiting for the first frame".
+The firmware removes heating when commands from iHeater-link stop arriving and resumes operation when they arrive again.
 
-If no valid frame is received during this 20-second window, the firmware enters `ERROR_LINK_LOST` exactly as it would after a runtime drop.
+After power-up the firmware waits for the first frame and shows a slow chasing light (1000 ms step). The heater is off. The wait has no time limit: until the link has been established once, the absence of frames is not treated as a link loss.
 
-Once the first frame has been received, the normal rule applies: a gap of more than 1.5 seconds with no frames triggers the fault.
+Once the first frame has been received, the rule is: if no frames arrive for more than **5 seconds**, the link is considered lost. During these 5 seconds iHeater keeps executing the last command.
 
-When the fault fires:
+When the link is lost:
 
-1. The firmware persists error code `0x08` (`ERROR_LINK_LOST`) in flash.
-2. The MCU is reset.
-3. After the reset the heater is off; the firmware again opens a 20-second waiting window with the slow chasing light, then falls back to the slow synchronous blink of all three LEDs.
-4. To clear the error, hold the MODE button while powering the device on, then release it. The device returns to normal operation.
+1. The heater turns off.
+2. The fan turns on and runs until the link is restored.
+3. The LEDs show the "beacon": all three LEDs flash for ~100 ms every 2 s.
+
+No error is stored in flash, the MCU does not reset, and there is no need to press the MODE button. When frames arrive again, iHeater executes the received command: with a `45..90` setpoint it resumes heating, with `0` or `10` it stays off.
 
 #### MODE button
 
@@ -249,7 +250,7 @@ The device auto-resets and shows an error code using LED indicators. The fan wil
 | 0x05  | Heater thermistor disconnected             |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](../img/ball_gifs/black_ball.gif) |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)   |
 | 0x06  | Heater overtemperature                     |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif) |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED OFF](../img/ball_gifs/black_ball.gif)   |
 | 0x07  | Air overtemperature                        |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)  |![LED 10Hz](../img/ball_gifs/blinking_ball_10hz.gif)   |
-| 0x08  | iHeater-link lost (pulse build only)       | 0.25 Hz | 0.25 Hz | 0.25 Hz |
+| 0x08  | iHeater-link lost (pulse build v0.5.0; not stored since v0.5.1)       | 0.25 Hz | 0.25 Hz | 0.25 Hz |
 | 0xFF  | Unknown error                              |![LED ON](../img/ball_gifs/red_ball.gif)  | ![LED ON](../img/ball_gifs/red_ball.gif)|![LED ON](../img/ball_gifs/red_ball.gif)  |
 
 
