@@ -308,12 +308,13 @@ int main(void)
 #if INPUT_MODE == INPUT_MODE_DIGITAL_PULSE
     PulseInput_Tick();
 
-    if (PulseInput_IsLinkLost())
+    bool link_lost = PulseInput_IsLinkLost();
+    if (link_lost)
     {
-      // No RMT frames within PULSE_FRAME_TIMEOUT_MS — treat as a safety fault:
-      // persist the error, reboot into the fault-display path (heater off by default).
-      SaveErrorCode(ERROR_LINK_LOST);
-      NVIC_SystemReset();
+      // No RMT frames within PULSE_FRAME_TIMEOUT_MS: heater off, fan forced on below.
+      // Not latched — the next valid frame restores its command.
+      mode = MODE_0;
+      pulse_air_target = 0.0f;
     }
 
     {
@@ -338,6 +339,14 @@ int main(void)
     }
 #endif
 
+#if INPUT_MODE == INPUT_MODE_DIGITAL_PULSE
+    if (link_lost)
+    {
+      //* Link lost: fan stays on regardless of temperatures
+      HAL_GPIO_WritePin(FAN_GPIO_Port, FAN_Pin, GPIO_PIN_SET);
+    }
+    else
+#endif
     if (mode == MODE_0)
     {
       //* В режиме 0 смотрим только на нагреватель
@@ -1034,6 +1043,16 @@ void Update_LEDs(uint8_t mode, float current_temp, uint32_t speed)
   uint32_t tick = HAL_GetTick();
 
 #if INPUT_MODE == INPUT_MODE_DIGITAL_PULSE
+  //* Link lost: heater off, waiting for frames. Beacon: all three LEDs flash ~100 ms every 2 s.
+  if (PulseInput_IsLinkLost())
+  {
+    GPIO_PinState s = ((tick % 2000U) < 100U) ? GPIO_PIN_SET : GPIO_PIN_RESET;
+    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, s);
+    HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, s);
+    HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, s);
+    return;
+  }
+
   //* Link-lost fault: all three LEDs blink synchronously.
   //* Dedicated path because the bit-mask rendering below cannot express 0x08.
   if (mode == ERROR_LINK_LOST)
@@ -1061,10 +1080,10 @@ void Update_LEDs(uint8_t mode, float current_temp, uint32_t speed)
     return;
   }
 
-  //* Pulse active heating: chasing light LED1 → LED2 → LED3 at 2 Hz step.
+  //* Pulse active heating: chasing light LED1 → LED2 → LED3 at 200 ms step.
   if (mode == MODE_PULSE)
   {
-    uint32_t phase = (tick / 500U) % 3U;
+    uint32_t phase = (tick / 200U) % 3U;
     HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, phase == 0U ? GPIO_PIN_SET : GPIO_PIN_RESET);
     HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, phase == 1U ? GPIO_PIN_SET : GPIO_PIN_RESET);
     HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, phase == 2U ? GPIO_PIN_SET : GPIO_PIN_RESET);

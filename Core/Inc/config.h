@@ -102,11 +102,10 @@ enum Mode
 // ESP pulls it LOW to produce a pulse. We count FALLING edges on PB1.
 // Frame layout (reference): SYNC LOW ~120 ms, then N × (LOW 2 ms + HIGH 2 ms), then IDLE HIGH.
 #define PULSE_SYNC_MIN_MS 50U        // Silence (HIGH) between falling edges that marks a frame boundary.
-#define PULSE_FRAME_TIMEOUT_MS 1500U // No falling edges for this long → link considered lost.
+#define PULSE_FRAME_TIMEOUT_MS 5000U // No falling edges for this long → link considered lost.
 #define PULSE_MAX_COUNT 255U         // Saturation of the in-frame counter.
 #define PULSE_OFF_CODE 10U           // Agreed "heater off" command from the iHeater-link ESP firmware.
 #define PULSE_MIN_TARGET 45U         // Minimum accepted heating setpoint (°C). Codes below this are ignored (except 0 and PULSE_OFF_CODE).
-#define PULSE_LINK_GRACE_MS 20000U   // Boot grace period: link-lost is suppressed while we are still waiting for the first frame.
 #endif
 
 #define HEATER_MIN_TEMP_DELTA 0.1f                  // Minimum required temperature increase

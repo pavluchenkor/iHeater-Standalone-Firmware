@@ -91,8 +91,11 @@ void PulseInput_OnFallingEdge(void)
 
 void PulseInput_Tick(void)
 {
+    // Read the edge timestamp before the tick, so an edge ISR in between
+    // cannot make it newer than `now` (unsigned underflow → false link loss).
+    uint32_t last_edge = s_last_edge_ms;
     uint32_t now = HAL_GetTick();
-    uint32_t silence = now - s_last_edge_ms;
+    uint32_t silence = now - last_edge;
 
     if (s_in_frame && silence >= PULSE_SYNC_MIN_MS)
     {
@@ -129,9 +132,8 @@ bool PulseInput_TryGetFrame(uint8_t *code)
 
 bool PulseInput_IsLinkLost(void)
 {
-    // Suppress link-lost while we are still waiting for the very first frame inside the
-    // boot grace window — gives the ESP-side iHeater-link time to bring up Wi-Fi/MQTT.
-    if (!s_first_frame_received && (HAL_GetTick() - s_init_ms) < PULSE_LINK_GRACE_MS)
+    // Before the first frame the link was never up: that is "waiting", not "lost".
+    if (!s_first_frame_received)
     {
         return false;
     }
@@ -140,11 +142,7 @@ bool PulseInput_IsLinkLost(void)
 
 bool PulseInput_IsWaitingFirstFrame(void)
 {
-    if (s_first_frame_received)
-    {
-        return false;
-    }
-    return (HAL_GetTick() - s_init_ms) < PULSE_LINK_GRACE_MS;
+    return !s_first_frame_received;
 }
 
 #endif // INPUT_MODE == INPUT_MODE_DIGITAL_PULSE

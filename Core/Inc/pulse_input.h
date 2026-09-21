@@ -23,11 +23,11 @@ void PulseInput_Tick(void);
 bool PulseInput_TryGetFrame(uint8_t *code);
 
 // True once PULSE_FRAME_TIMEOUT_MS has elapsed without a falling edge. Remains true until
-// a new frame arrives. During the boot grace window (see PULSE_LINK_GRACE_MS) this returns
-// false even with no frames yet, so the ESP-side iHeater-link has time to come up.
+// a new frame arrives. Before the first frame this returns false: the link was never up,
+// which is "waiting" (see PulseInput_IsWaitingFirstFrame), not "lost".
 bool PulseInput_IsLinkLost(void);
 
-// True from boot until either the first frame is decoded or PULSE_LINK_GRACE_MS elapses.
+// True from boot until the first frame is decoded.
 // Used by the LED renderer to show a "waiting for first frame" indication.
 bool PulseInput_IsWaitingFirstFrame(void);
 
