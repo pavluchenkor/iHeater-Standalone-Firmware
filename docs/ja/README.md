@@ -263,4 +263,4 @@ pulse-ビルドでは、MODEボタン**はモードを切り替えず、キャ�
 
 ---
 
-このソフトウェアは Apache License 2.0 に基づいてライセンスされています。商用利用が可能です。詳細は [LICENSE](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/blob/main/LICENSE) ファイルを参照してください。
+このソフトウェアは GNU GPL バージョン 3 またはそれ以降に基づいてライセンスされています。商用利用が可能です。詳細は [LICENSE](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/blob/main/LICENSE) ファイルを参照してください。

@@ -6,7 +6,7 @@
 
 **Прошивка для нагревателя iHeater. Нажал кнопку — греет.**
 
-[![Документация](https://img.shields.io/badge/docs-idryer.org-e7352c)](https://docs.idryer.org/projects/iheater/standalone/) [![Telegram](https://img.shields.io/badge/Telegram-iDryer-2ca5e0)](https://t.me/iDryer) [![Discord](https://img.shields.io/badge/Discord-join-5865f2)](https://discord.gg/jGce5eeHHz) [![Лицензия](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+[![Документация](https://img.shields.io/badge/docs-idryer.org-e7352c)](https://docs.idryer.org/projects/iheater/standalone/) [![Telegram](https://img.shields.io/badge/Telegram-iDryer-2ca5e0)](https://t.me/iDryer) [![Discord](https://img.shields.io/badge/Discord-join-5865f2)](https://discord.gg/jGce5eeHHz) [![Лицензия](https://img.shields.io/badge/license-GPL--3.0--or--later-blue)](LICENSE)
 
 <img src="docs/img/iHeater_200.png" width="480" alt="iHeater">
 
@@ -120,7 +120,7 @@
 
 ## Лицензия
 
-Код — [Apache License 2.0](LICENSE), [NOTICE](NOTICE).
+Код — [GNU GPL v3.0 или новее](LICENSE), [NOTICE](NOTICE).
 
 Имя iDryer лицензией не покрывается — [TRADEMARKS.md](https://github.com/pavluchenkor/idryer-core/blob/main/TRADEMARKS.md).
 

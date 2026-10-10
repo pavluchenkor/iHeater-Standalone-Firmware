@@ -6,7 +6,7 @@
 
 **Firmware for the iHeater heater. Press the button, it heats.**
 
-[![Documentation](https://img.shields.io/badge/docs-idryer.org-e7352c)](https://docs.idryer.org/en/projects/iheater/standalone/) [![Telegram](https://img.shields.io/badge/Telegram-iDryer-2ca5e0)](https://t.me/iDryer) [![Discord](https://img.shields.io/badge/Discord-join-5865f2)](https://discord.gg/jGce5eeHHz) [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+[![Documentation](https://img.shields.io/badge/docs-idryer.org-e7352c)](https://docs.idryer.org/en/projects/iheater/standalone/) [![Telegram](https://img.shields.io/badge/Telegram-iDryer-2ca5e0)](https://t.me/iDryer) [![Discord](https://img.shields.io/badge/Discord-join-5865f2)](https://discord.gg/jGce5eeHHz) [![License](https://img.shields.io/badge/license-GPL--3.0--or--later-blue)](LICENSE)
 
 <img src="docs/img/iHeater_200.png" width="480" alt="iHeater">
 
@@ -120,7 +120,7 @@ Working firmware, prebuilt binaries on the [releases page](https://github.com/pa
 
 ## License
 
-Code is under the [Apache License 2.0](LICENSE), [NOTICE](NOTICE).
+Code is under the [GNU GPL v3.0 or later](LICENSE), [NOTICE](NOTICE).
 
 The iDryer name is not covered by the license, see [TRADEMARKS.md](https://github.com/pavluchenkor/idryer-core/blob/main/TRADEMARKS.md).
 

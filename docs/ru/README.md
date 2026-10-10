@@ -263,4 +263,4 @@ iHeater - это компактное и доступное решение дл�
 
 ---
 
-Это программное обеспечение распространяется под лицензией Apache License 2.0. Коммерческое использование разрешено. Подробности — в файле [LICENSE](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/blob/main/LICENSE).
+Это программное обеспечение распространяется под лицензией GNU GPL версии 3 или новее. Коммерческое использование разрешено. Подробности — в файле [LICENSE](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/blob/main/LICENSE).

@@ -263,4 +263,4 @@ V případě, že existuje potvrzení, že odpory termistoru se liší od skute�
 
 ---
 
-Tento software je licencován pod licencí Apache 2.0. Komerční použití je povoleno. Podrobnosti najdete v souboru [LICENSE](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/blob/main/LICENSE).
+Tento software je licencován pod licencí GNU GPL verze 3 nebo novější. Komerční použití je povoleno. Podrobnosti najdete v souboru [LICENSE](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/blob/main/LICENSE).

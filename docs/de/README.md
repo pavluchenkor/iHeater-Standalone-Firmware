@@ -263,4 +263,4 @@ Für den Fall, dass Bestätigung besteht, dass die Thermistor-Messwerte von der 
 
 ---
 
-Diese Software ist unter der Apache-Lizenz 2.0 lizenziert. Die kommerzielle Nutzung ist gestattet. Details stehen in der Datei [LICENSE](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/blob/main/LICENSE).
+Diese Software ist unter der GNU GPL Version 3 oder später lizenziert. Die kommerzielle Nutzung ist gestattet. Details stehen in der Datei [LICENSE](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/blob/main/LICENSE).
