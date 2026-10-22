@@ -43,9 +43,9 @@
 
 typedef struct
 {
-  uint32_t magic;        // Проверка инициализации
-  uint8_t default_mode;  // Режим по умолчанию
-  float trigger_on_temp; //
+  uint32_t magic;        // Initialization check
+  uint8_t default_mode;
+  float trigger_on_temp;
   float trigger_off_temp;
 } NVS_Data;
 
@@ -127,7 +127,7 @@ uint32_t previous_time = 0;
 volatile bool trigger_heater_enabled = false;
 volatile bool trigger_state_reached = false;
 
-//* Температуры для режимов
+//* Temperatures for modes
 const float mode_temperatures[] = {MODE_TEMP_0, MODE_TEMP_1, MODE_TEMP_2, MODE_TEMP_3, MODE_TEMP_4, MODE_TEMP_5, MODE_TEMP_6, MODE_TEMP_7};
 
 volatile float output = 0.0f;
@@ -189,7 +189,7 @@ Thermistor therm0, therm1, therm2;
 PID_Controller pid_air;
 PID_Controller pid_heater;
 
-//* Объявление фильтров
+//* Filter declarations
 EmaFilter filter_heater;
 EmaFilter filter_air;
 EmaFilter filter_trigger;
@@ -340,7 +340,7 @@ int main(void)
 
     if (mode == MODE_0)
     {
-      //* В режиме 0 смотрим только на нагреватель
+      //* In mode 0, we look only at the heater
       if (heater_temp > FAN_ON_TEMP)
       {
         HAL_GPIO_WritePin(FAN_GPIO_Port, FAN_Pin, GPIO_PIN_SET);
@@ -418,7 +418,7 @@ int main(void)
         air_error *= scale;
       }
 
-      // // Дополнительное усиление на этапе прогрева
+      // // Additional boost during warm-up phase
       // if (air_error > 0.0f) {
       //     float boost = 1.0f + air_error / 10.0f;
       //     air_error *= boost;
@@ -742,7 +742,7 @@ int main(void)
     //* Just in case
     if (mode == MODE_0 || mode == CALIBRATION_STEP_1 || mode == CALIBRATION_STEP_2)
     {
-      // // Сброс состояний триггера
+      // // Reset trigger states
       // if(trigger_heater_enabled || trigger_state_reached)
       //   {
       //     trigger_heater_enabled = false;
@@ -894,7 +894,7 @@ static void MX_TIM2_Init(void)
 {
 
   /* USER CODE BEGIN TIM2_Init 0 */
-  //* Рассчитываем параметры для таймера
+  //* Calculate parameters for the timer
   uint32_t prescaler = (TIMER_CLOCK / (PWM_FREQUENCY * PWM_STEPS)) - 1;
   uint32_t period = PWM_STEPS - 1;
   /* USER CODE END TIM2_Init 0 */
@@ -996,7 +996,7 @@ void NVS_Load(void)
   }
   else
   {
-    // Значения по умолчанию
+    // Default values
     nvs_data.magic = NVS_MAGIC;
     nvs_data.default_mode = MODE_0;
     nvs_data.trigger_on_temp = TRIGGER_ON_TEMP;
@@ -1194,22 +1194,22 @@ void MX_IWDG_Init(void)
   //     Error_Handler();
   // }
 
-  // Активация
+  // Activate watchdog
   IWDG->KR = 0xCCCC; //* Enable
   IWDG->KR = 0x5555; //* Allow write
   IWDG->PR = 0x03;   //* Prescaler: 64
   IWDG->RLR = 2000;  //* Reload value
   while (IWDG->SR != 0)
   {
-  } //* Ждём готовности
-  IWDG->KR = 0xAAAA; //* Первый сброс
+  } //* Wait for watchdog to be ready
+  IWDG->KR = 0xAAAA; //* First reset
 }
 
 void SaveErrorCode(uint32_t code)
 {
   HAL_FLASH_Unlock();
 
-  //* Erace page
+  //* Erase page
   FLASH_EraseInitTypeDef eraseInit;
   uint32_t pageError = 0;
 
@@ -1220,7 +1220,7 @@ void SaveErrorCode(uint32_t code)
   if (HAL_FLASHEx_Erase(&eraseInit, &pageError) != HAL_OK)
   {
     HAL_FLASH_Lock();
-    return; //* Erace error
+    return; //* Erase error
   }
 
   //* Write 4 bytes

@@ -8,16 +8,16 @@ float clamp(float value, float min, float max) {
 
 
 /**
- * @brief Инициализация PID-контроллера.
+ * @brief Initialize the PID controller.
  *
- * @param pid              Указатель на структуру PID_Controller.
- * @param Kp               Пропорциональный коэффициент (P).
- * @param Ki               Интегральный коэффициент (I).
- * @param Kd               Дифференциальный коэффициент (D).
- * @param out_min          Минимальное значение выходного сигнала.
- * @param out_max          Максимальное значение выходного сигнала.
- * @param min_deriv_time   Минимальное время между расчётами производной (секунды).
- * @param max_power        Максимальная мощность (используется для ограничения интеграла).
+ * @param pid              Pointer to the PID_Controller structure.
+ * @param Kp               Proportional gain (P).
+ * @param Ki               Integral gain (I).
+ * @param Kd               Differential gain (D).
+ * @param out_min          Minimum output signal value.
+ * @param out_max          Maximum output signal value.
+ * @param min_deriv_time   Minimum time between derivative calculations (seconds).
+ * @param max_power        Maximum power (used to limit the integral).
  */
 void PID_Init(PID_Controller *pid, float Kp, float Ki, float Kd,
               float out_min, float out_max,

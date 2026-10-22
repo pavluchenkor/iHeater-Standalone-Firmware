@@ -12,14 +12,14 @@ const ThermistorData thermistor_table[] = {
     {25.0f, 100000.0f, 50.0f, 31230.0f, 125.0f, 2066.0f},    // 5: TDK NTCG104LH104JT1
 };
 
-// Инициализация термистора
+// Thermistor initialization
 void thermistor_init(Thermistor *therm, float pullup, float inline_resistor) {
     therm->pullup = pullup;
     therm->inline_resistor = inline_resistor;
     therm->c1 = therm->c2 = therm->c3 = 0.0f;
 }
 
-// Установка коэффициентов Штейнхарта-Харта
+// Set the Steinhart-Hart coefficients
 void thermistor_set_coefficients(Thermistor *therm,
                                  float t1, float r1,
                                  float t2, float r2,
@@ -47,7 +47,7 @@ void thermistor_set_coefficients(Thermistor *therm,
     therm->c1 = inv_t1 - therm->c2 * ln_r1 - therm->c3 * ln3_r1;
 }
 
-// Расчёт температуры из значения АЦП
+// Calculate temperature from ADC value
 float thermistor_calc_temp(Thermistor *therm, float adc_value) {
     float r = therm->pullup * adc_value / (1.0f - adc_value);
     float ln_r = log(r - therm->inline_resistor);
@@ -55,10 +55,10 @@ float thermistor_calc_temp(Thermistor *therm, float adc_value) {
     return (1.0f / inv_t) + KELVIN_TO_CELSIUS;
 }
 
-// Функция для получения данных термистора по индексу
+// Function to get thermistor data by index
 const ThermistorData* get_thermistor_data(uint8_t index) {
     if (index < THERMISTOR_TABLE_SIZE) {
         return &thermistor_table[index];
     }
-    return NULL; // Возвращает NULL, если индекс некорректный
+    return NULL; // Return NULL if the index is invalid
 }

@@ -1,7 +1,7 @@
 #include "ema_filter.h"
 
 /**
- * @brief Инициализация фильтра EMA.
+ * @brief Initialize the EMA filter.
  */
 void ema_filter_init(EmaFilter *f, float alpha) {
     f->alpha = alpha;
@@ -10,10 +10,10 @@ void ema_filter_init(EmaFilter *f, float alpha) {
 }
 
 /**
- * @brief Обновление EMA фильтра новым значением.
+ * @brief Update the EMA filter with a new value.
  *
- * Если фильтр ещё не инициализирован, новое значение принимается как первое сглаженное.
- * Иначе используется формула EMA: filtered = alpha * новое + (1 - alpha) * предыдущее.
+ * If the filter has not yet been initialized, the new value is taken as the first smoothed value.
+ * Otherwise, the EMA formula is used: filtered = alpha * new + (1 - alpha) * previous.
  */
 float ema_filter_update(EmaFilter *f, float new_value) {
     if (!f->initialized) {

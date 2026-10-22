@@ -4,29 +4,29 @@
 #include <stdint.h>
 #include "thermistor_data.h"
 
-// Константа для перевода Кельвинов в Цельсии
+// Offset between Kelvin and degrees Celsius
 #define KELVIN_TO_CELSIUS -273.15f
 
-// Структура для расчётов термистора
+// Structure for thermistor calculations
 typedef struct {
-    float pullup;          // Сопротивление подтягивающего резистора
-    float inline_resistor; // Последовательный резистор, если есть
-    float c1, c2, c3;      // Коэффициенты Штейнхарта-Харта
+    float pullup;          // Resistance of the pull-up resistor in ohms
+    float inline_resistor; // Resistance of the series resistor in ohms, if any (otherwise 0)
+    float c1, c2, c3;      // Steinhart-Hart coefficients
 } Thermistor;
 
-// Инициализация термистора
+// Thermistor initialization
 void thermistor_init(Thermistor *therm, float pullup, float inline_resistor);
 
-// Установка коэффициентов Штейнхарта-Харта
+// Set the Steinhart-Hart coefficients from the specified temperatures (°C) and resistance values (ohms)
 void thermistor_set_coefficients(Thermistor *therm,
                                  float t1, float r1,
                                  float t2, float r2,
                                  float t3, float r3);
 
-// Расчёт температуры из значения АЦП
+// Calculate temperature from ADC value
 float thermistor_calc_temp(Thermistor *therm, float adc_value);
 
-// Функция для получения данных из таблицы
-const ThermistorData* get_thermistor_data(uint8_t type);
+// Function to get thermistor data by index
+const ThermistorData* get_thermistor_data(uint8_t index);
 
 #endif // THERMISTOR_H
