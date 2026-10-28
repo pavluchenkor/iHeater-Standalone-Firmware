@@ -27,6 +27,26 @@ Le dispositif assure le chauffage et le maintien d'une température stable à l'
 
 ---
 
+## Alimentation
+
+La carte iHeater ne dispose pas de source d'alimentation propre. Pour l'utiliser en mode Standalone, alimentez la carte en 5 V.
+
+!!! warning "Vérifiez que la carte est alimentée."
+    Sans alimentation, les LED restent éteintes et le chauffage ne démarre pas. Vérifiez l'alimentation avant de chercher la cause dans le firmware ou les paramètres.
+
+Options d'alimentation :
+
+* **Câble USB.** Branchez l'USB sur un adaptateur secteur ou toute autre source 5 V. Un hôte (imprimante, Klipper) n'est pas nécessaire.
+* **Alimentation externe 5 V.** Branchez la source sur le connecteur d'alimentation séparé de la carte ; son emplacement dépend de la révision de la carte. Cette option convient lorsqu'elle simplifie le montage, par exemple en alimentant la carte depuis l'alimentation de l'imprimante.
+* **Module d'alimentation 5 V sur la carte** (option expérimentale). Le module se soude directement sur la carte et l'alimente depuis la source choisie. Cette option ne fait pas partie de l'ensemble de base et a été moins testée que les autres.
+
+!!! danger "Ne branchez jamais plusieurs sources d'alimentation en même temps."
+    Brancher simultanément l'USB, une source externe et un module d'alimentation provoque un conflit entre les sources et des dysfonctionnements, et peut endommager le matériel.
+
+L'indication par LED montre que la carte est alimentée.
+
+---
+
 ## Comment configurer le firmware
 
 ### Fichier `config.h`
@@ -204,6 +224,9 @@ Le firmware est déjà configuré avec les modes de température de MODE_TEMP_0 
 ---
 
 ## Mode d'emploi
+
+Avant l'utilisation, vérifiez que la carte est alimentée — voir la section « Alimentation ».
+
 === "r1"
 
     - **Appui court** sur le bouton MODE - changement de mode (0-7)

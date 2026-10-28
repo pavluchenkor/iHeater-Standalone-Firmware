@@ -26,6 +26,26 @@ The device ensures heating and stable temperature maintenance inside the printer
 
 ---
 
+## Power
+
+The iHeater board has no built-in power source. To run it in Standalone mode, supply 5 V to the board.
+
+!!! warning "Make sure the board is powered."
+    Without power, the LEDs stay off and heating does not start. Check the power supply before looking for the cause in the firmware or settings.
+
+Power options:
+
+* **USB cable.** Connect USB to a power adapter or any other 5 V source. A host (printer, Klipper) is not required.
+* **External 5 V supply.** Connect the supply to the separate power connector on the board; the connector location depends on the board revision. Use this option when it makes mounting more convenient, for example when powering the board from the printer's power supply.
+* **5 V power module on the board** (experimental option). The module is soldered directly onto the board and powers it from the selected source. This option is not part of the base kit and has not been tested as thoroughly as the others.
+
+!!! danger "Never connect more than one power source at the same time."
+    Connecting USB, an external supply, and a power module at the same time causes a power source conflict and malfunctions, and can damage the hardware.
+
+The LED indication shows that the board is powered.
+
+---
+
 ## How to Configure the Firmware
 
 ### File `config.h`
@@ -213,6 +233,9 @@ This firmware is pre-configured with the temperature modes from MODE_TEMP_0 to M
 ---
 
 ## How to Use
+
+Before use, make sure the board is powered — see the "Power" section.
+
 
 === "r1"
 

@@ -20,6 +20,26 @@ O dispositivo fornece aquecimento e mantém uma temperatura estável dentro da c
 
 ---
 
+## Alimentação
+
+A placa iHeater não possui fonte de alimentação própria. Para usá-la no modo Standalone, alimente a placa com 5 V.
+
+!!! warning "Verifique se a placa está alimentada."
+    Sem alimentação, os LEDs permanecem apagados e o aquecimento não é iniciado. Verifique a alimentação antes de procurar a causa no firmware ou nas configurações.
+
+Opções de alimentação:
+
+* **Cabo USB.** Ligue o USB a um adaptador de energia ou a qualquer outra fonte de 5 V. Um host (impressora, Klipper) não é necessário.
+* **Fonte externa de 5 V.** Ligue a fonte ao conector de alimentação separado da placa; a posição do conector depende da revisão da placa. Use esta opção quando ela facilitar a montagem, por exemplo ao alimentar a placa a partir da fonte da impressora.
+* **Módulo de alimentação de 5 V na placa** (opção experimental). O módulo é soldado diretamente na placa e a alimenta a partir da fonte escolhida. Esta opção não faz parte do conjunto básico e foi testada com menos rigor do que as demais.
+
+!!! danger "Nunca ligue várias fontes de alimentação ao mesmo tempo."
+    Ligar USB, fonte externa e módulo de alimentação ao mesmo tempo causa conflito entre as fontes e falhas de funcionamento, e pode danificar o equipamento.
+
+A indicação por LED mostra que a placa está alimentada.
+
+---
+
 ## Como configurar o firmware
 
 ### Arquivo \`config.h\`

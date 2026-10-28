@@ -27,6 +27,26 @@ Zařízení zajišťuje ohřev a udržování stabilní teploty uvnitř komory 3
 
 ---
 
+## Napájení
+
+Deska iHeater nemá vlastní zdroj napájení. Pro provoz v režimu Standalone připojte k desce napájení 5 V.
+
+!!! warning "Ujistěte se, že je deska napájena."
+    Bez napájení LED nesvítí a topení se nezapne. Zkontrolujte napájení dřív, než budete hledat příčinu ve firmwaru nebo v nastavení.
+
+Možnosti napájení:
+
+* **Kabel USB.** Připojte USB k napájecímu adaptéru nebo jinému zdroji 5 V. Hostitel (tiskárna, Klipper) není potřeba.
+* **Externí zdroj 5 V.** Připojte zdroj k samostatnému napájecímu konektoru na desce; jeho umístění závisí na revizi desky. Tato možnost se hodí, pokud usnadní montáž, například při napájení ze zdroje tiskárny.
+* **Napájecí modul 5 V na desce** (experimentální možnost). Modul se připájí přímo na desku a napájí ji z vybraného zdroje. Tato možnost není součástí základní sady a byla otestována méně důkladně než ostatní.
+
+!!! danger "Nikdy nepřipojujte více zdrojů napájení současně."
+    Současné připojení USB, externího zdroje a napájecího modulu způsobí konflikt zdrojů a poruchy provozu a může poškodit zařízení.
+
+Že je deska napájena, ukazuje LED indikace.
+
+---
+
 ## Jak nakonfigurovat firmware
 
 ### Soubor `config.h`
@@ -204,6 +224,9 @@ Firmware je již nakonfigurován s teplotními režimy od MODE_TEMP_0 do MODE_TE
 ---
 
 ## Jak používat
+
+Před použitím se ujistěte, že je deska napájena — viz část „Napájení“.
+
 === "r1"
 
     - **Krátké stisknutí** tlačítka MODE - přepínání režimů (0-7)

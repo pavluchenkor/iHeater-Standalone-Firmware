@@ -26,6 +26,26 @@ Das Gerät gewährleistet das Heizen und die Aufrechterhaltung einer stabilen Te
 
 ---
 
+## Stromversorgung
+
+Die iHeater-Platine besitzt keine eigene Stromquelle. Für den Betrieb im Standalone-Modus versorgen Sie die Platine mit 5 V.
+
+!!! warning "Stellen Sie sicher, dass die Platine mit Strom versorgt wird."
+    Ohne Versorgung leuchten die LEDs nicht und die Heizung startet nicht. Prüfen Sie die Stromversorgung, bevor Sie die Ursache in der Firmware oder in den Einstellungen suchen.
+
+Optionen für die Stromversorgung:
+
+* **USB-Kabel.** Schließen Sie USB an ein Netzteil oder eine andere 5-V-Quelle an. Ein Host (Drucker, Klipper) ist nicht erforderlich.
+* **Externe 5-V-Quelle.** Schließen Sie die Quelle an den separaten Stromanschluss der Platine an; die Lage des Anschlusses hängt von der Platinenrevision ab. Diese Option eignet sich, wenn sie die Montage vereinfacht, zum Beispiel bei Versorgung über das Netzteil des Druckers.
+* **5-V-Stromversorgungsmodul auf der Platine** (experimentelle Option). Das Modul wird direkt auf die Platine gelötet und versorgt sie aus der gewählten Quelle. Die Option gehört nicht zum Grundumfang und ist weniger gründlich getestet als die übrigen.
+
+!!! danger "Schließen Sie niemals mehrere Stromquellen gleichzeitig an."
+    Das gleichzeitige Anschließen von USB, externer Quelle und Stromversorgungsmodul führt zu einem Konflikt der Quellen und zu Fehlfunktionen und kann die Hardware beschädigen.
+
+Ob die Platine mit Strom versorgt wird, zeigt die LED-Anzeige.
+
+---
+
 ## Konfiguration der Firmware
 
 ### Datei `config.h`
@@ -203,6 +223,9 @@ Die Firmware ist bereits mit Temperatureschemata von MODE_TEMP_0 bis MODE_TEMP_7
 ---
 
 ## Bedienung
+
+Stellen Sie vor der Benutzung sicher, dass die Platine mit Strom versorgt wird — siehe Abschnitt „Stromversorgung“.
+
 
 === "r1"
 
